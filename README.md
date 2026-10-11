@@ -1,36 +1,39 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<h1 align="center">Code2Live</h1>
 
-## Getting Started
+<p align="center">
+  AI-Driven Full-Stack Application Synthesis & Execution Platform
+</p>
 
-First, run the development server:
+<p align="center">
+  <img src="https://img.shields.io/badge/Architecture-Microservices-blue" alt="Architecture" />
+  <img src="https://img.shields.io/badge/Backend-Spring%20Boot-green" alt="Spring Boot" />
+  <img src="https://img.shields.io/badge/AI%20Engine-Spring%20AI-007ACC" alt="Spring AI" />
+  <img src="https://img.shields.io/badge/Event%20Driven-Apache%20Kafka-red" alt="Kafka" />
+  <img src="https://img.shields.io/badge/Cache-Redis-DC382D" alt="Redis" />
+  <img src="https://img.shields.io/badge/Infrastructure-Kubernetes-326CE5" alt="Kubernetes" />
+  <img src="https://img.shields.io/badge/Frontend-Next.js%2016%20%7C%20React%2019-black" alt="Next.js" />
+</p>
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Overview
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+**Code2Live** is a developer platform that converts natural language requirements into production-ready web applications with real-time multi-file streaming, container sandboxes, and automated execution. This interface provides an interactive showcase, realistic code-streaming telemetry, and live demo environments.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## System Architecture
 
-## Learn More
+- **Interface**: Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, Geist typography
+- **Backend Platform**: Spring Boot, Spring AI, Apache Kafka, Redis, Kubernetes Sandboxes
+- **Telemetry**: Real-time WebSocket streaming, AST synthesis pipeline, responsive viewport simulation
 
-To learn more about Next.js, take a look at the following resources:
+## 🌐 Live Environments
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Showcase**: [code2live.adarshcodes.com](https://code2live.adarshcodes.com)
+- **Architecture Specs**: [adarshcodes.com/#project=lovable](https://adarshcodes.com/#project=lovable)
+- **Engine Repository**: [github.com/Adarsh6158/AI-Code-Generation-Platform](https://github.com/Adarsh6158/AI-Code-Generation-Platform)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+<p align="center">
+  &copy; 2026 Adarsh Kumar &nbsp;&bull;&nbsp; <a href="https://adarshcodes.com">adarshcodes.com</a>
+</p>
