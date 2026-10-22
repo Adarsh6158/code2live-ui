@@ -38,6 +38,7 @@ pre.spring-ascii-art {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {

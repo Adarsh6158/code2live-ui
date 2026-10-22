@@ -1050,8 +1050,8 @@ export function CodeToLivePreview({
                 {/* Bottom Chat Input Bar */}
                 <div
                   className={`p-2 rounded-xl bg-[#252526] border transition-all duration-300 flex items-center justify-between shrink-0 ${phase === "prompt_typing"
-                      ? "border-blue-500/60 shadow-[0_0_15px_rgba(59,130,246,0.15)] ring-1 ring-blue-500/30"
-                      : "border-[#333333]"
+                    ? "border-blue-500/60 shadow-[0_0_15px_rgba(59,130,246,0.15)] ring-1 ring-blue-500/30"
+                    : "border-[#333333]"
                     }`}
                 >
                   <div className="flex items-center gap-2 flex-1 min-w-0 pl-1.5 pr-2">
@@ -1070,10 +1070,10 @@ export function CodeToLivePreview({
                   </div>
                   <div
                     className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all duration-300 ${phase === "prompt_typing"
-                        ? "bg-blue-600 text-white shadow-md scale-105"
-                        : phase === "prompt_moving_up"
-                          ? "bg-blue-500 text-white scale-95"
-                          : "bg-[#2d2d2d] text-[#858585] border border-[#3c3c3c]"
+                      ? "bg-blue-600 text-white shadow-md scale-105"
+                      : phase === "prompt_moving_up"
+                        ? "bg-blue-500 text-white scale-95"
+                        : "bg-[#2d2d2d] text-[#858585] border border-[#3c3c3c]"
                       }`}
                   >
                     <Send className="w-3 h-3" />
