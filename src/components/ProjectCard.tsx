@@ -57,12 +57,12 @@ export function ProjectCard({ project }: ProjectCardProps) {
         </BrowserFrame>
       </div>
 
-      <div className="flex items-center justify-center gap-3 sm:gap-4 pt-3 sm:pt-4 border-t border-slate-100">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 sm:gap-4 pt-3 sm:pt-4 border-t border-slate-100">
         <a
           href={project.architectureUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="group/btn inline-flex items-center justify-center gap-2 h-11 sm:h-12 px-6 sm:px-8 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 text-slate-800 text-sm sm:text-[15px] font-semibold shadow-2xs hover:shadow-xs transition-all duration-200 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-blue-600"
+          className="order-2 sm:order-1 group/btn inline-flex items-center justify-center gap-2 h-11 sm:h-12 px-5 sm:px-8 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 text-slate-800 text-sm sm:text-[15px] font-semibold shadow-2xs hover:shadow-xs transition-all duration-200 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-blue-600 w-full sm:w-auto"
         >
           <Layers className="w-4 h-4 text-slate-500 group-hover/btn:text-blue-600 transition-colors" />
           <span>View Architecture</span>
@@ -71,7 +71,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
 
         <Link
           href="/demo/code-to-live"
-          className="group/btn inline-flex items-center justify-center gap-2 h-11 sm:h-12 px-7 sm:px-9 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm sm:text-[15px] font-semibold shadow-[0_4px_16px_rgba(37,99,235,0.28)] hover:shadow-[0_6px_22px_rgba(37,99,235,0.40)] transition-all duration-200 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-blue-600"
+          className="order-1 sm:order-2 group/btn inline-flex items-center justify-center gap-2 h-11 sm:h-12 px-6 sm:px-9 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm sm:text-[15px] font-semibold shadow-[0_4px_16px_rgba(37,99,235,0.28)] hover:shadow-[0_6px_22px_rgba(37,99,235,0.40)] transition-all duration-200 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-blue-600 w-full sm:w-auto"
         >
           <Play className="w-4 h-4 fill-current text-white/95 group-hover/btn:text-white" />
           <span>Try Live Demo</span>

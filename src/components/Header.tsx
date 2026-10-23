@@ -23,12 +23,12 @@ export function Header() {
               priority
             />
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-slate-900 tracking-tight">
+          <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm min-w-0">
+            <span className="font-semibold text-slate-900 tracking-tight shrink-0">
               Adarsh Kumar
             </span>
             <span className="text-slate-300 font-light select-none">/</span>
-            <span className="text-xs font-medium text-slate-600 bg-slate-100/80 border border-slate-200/60 px-2 py-0.5 rounded-full">
+            <span className="font-medium text-slate-600 truncate">
               Code2Live
             </span>
           </div>
@@ -39,14 +39,17 @@ export function Header() {
           Explore the architecture, then experience the application live.
         </div>
 
-        <div className="flex items-center gap-2.5">
+        {/* Right: Actions */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <a
             href="https://adarshcodes.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="group inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 transition-colors px-3 py-1.5 rounded-lg border border-slate-200/80 hover:border-slate-300 bg-white shadow-xs focus-visible:outline-2 focus-visible:outline-blue-600"
+            title="Main Portfolio"
+            aria-label="Main Portfolio"
+            className="group inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 transition-colors px-2 sm:px-3 py-1.5 rounded-lg border border-slate-200/80 hover:border-slate-300 bg-white shadow-2xs focus-visible:outline-2 focus-visible:outline-blue-600"
           >
-            <span>Main Portfolio</span>
+            <span className="hidden sm:inline">Portfolio</span>
             <ArrowUpRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-700 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </a>
 
@@ -54,7 +57,9 @@ export function Header() {
             href="https://github.com/Adarsh6158/AI-Code-Generation-Platform"
             target="_blank"
             rel="noopener noreferrer"
-            className="group inline-flex items-center gap-1.5 text-xs font-medium text-slate-700 hover:text-slate-900 transition-colors px-3 py-1.5 rounded-lg border border-slate-200/80 hover:border-slate-300 bg-white hover:bg-slate-50 shadow-xs focus-visible:outline-2 focus-visible:outline-blue-600"
+            title="GitHub Repository"
+            aria-label="GitHub Repository"
+            className="group inline-flex items-center gap-1.5 text-xs font-medium text-slate-700 hover:text-slate-900 transition-colors px-2 sm:px-3 py-1.5 rounded-lg border border-slate-200/80 hover:border-slate-300 bg-white hover:bg-slate-50 shadow-2xs focus-visible:outline-2 focus-visible:outline-blue-600"
           >
             <Image
               src="/Github.svg"
@@ -63,7 +68,7 @@ export function Header() {
               height={14}
               className="w-3.5 h-3.5 object-contain"
             />
-            <span>GitHub Repo</span>
+            <span className="hidden sm:inline">GitHub</span>
             <ArrowUpRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-700 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </a>
         </div>

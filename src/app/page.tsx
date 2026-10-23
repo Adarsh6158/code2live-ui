@@ -38,7 +38,7 @@ export default function Home() {
 
       <Header />
 
-      <main className="flex-1 w-full max-w-7xl xl:max-w-[1400px] 2xl:max-w-[1520px] mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-5 flex flex-col gap-3">
+      <main className="flex-1 w-full max-w-7xl xl:max-w-[1400px] 2xl:max-w-[1520px] mx-auto px-3 sm:px-6 lg:px-8 pt-2 pb-5 flex flex-col gap-3">
         <section aria-label="Featured Project" className="w-full">
           <ProjectCard project={project} />
         </section>
@@ -46,25 +46,25 @@ export default function Home() {
         {/* Dedicated STACK Card with logos */}
         <section
           aria-label="Technology Stack"
-          className="w-full px-4 py-2.5 rounded-xl bg-slate-50/90 border border-slate-200/90 text-slate-700 flex items-center gap-2.5 shadow-2xs"
+          className="w-full px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-50/90 border border-slate-200/90 text-slate-700 flex items-center shadow-2xs"
         >
-          <div className="flex items-center gap-2.5 flex-wrap">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-mono font-semibold tracking-wider text-slate-800 bg-white border border-slate-200 shadow-2xs shrink-0 uppercase">
-              <Layers className="w-3.5 h-3.5 text-blue-600" />
+          <div className="flex items-center gap-1.5 sm:gap-2.5 flex-wrap w-full">
+            <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md text-[10px] sm:text-[11px] font-mono font-semibold tracking-wider text-slate-800 bg-white border border-slate-200 shadow-2xs shrink-0 uppercase">
+              <Layers className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-blue-600" />
               <span>STACK</span>
             </span>
-            <div className="flex items-center gap-1.5 flex-wrap">
+            <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
               {TECH_STACK_ITEMS.map((tech) => (
                 <span
                   key={tech.name}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white border border-slate-200/80 text-[11.5px] font-mono font-medium text-slate-700 shadow-2xs hover:border-slate-300 transition-colors select-none"
+                  className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md bg-white border border-slate-200/80 text-[10.5px] sm:text-[11.5px] font-mono font-medium text-slate-700 shadow-2xs hover:border-slate-300 transition-colors select-none"
                 >
                   <Image
                     src={tech.icon}
                     alt={`${tech.name} icon`}
                     width={14}
                     height={14}
-                    className="w-3.5 h-3.5 object-contain"
+                    className="w-3 h-3 sm:w-3.5 sm:h-3.5 object-contain"
                   />
                   <span>{tech.name}</span>
                 </span>
