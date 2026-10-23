@@ -265,7 +265,7 @@ export function CodeToLivePreview({
   const [typedPrompt, setTypedPrompt] = useState("");
   const [streamIndex, setStreamIndex] = useState(0);
   const [activeTab, setActiveTab] = useState<"app" | "telemetry">("app");
-  const [mobileView, setMobileView] = useState<"code" | "preview">("preview");
+  const [mobileView, setMobileView] = useState<"code" | "preview">("code");
 
   // Dice simulation state for Snake & Ladder
   const [diceValue, setDiceValue] = useState(6);
