@@ -7,7 +7,6 @@ import {
   Terminal,
   FileCode,
   CheckCircle2,
-  Layers,
   Activity,
   Cpu,
   Clock,
@@ -477,17 +476,15 @@ export function CodeToLivePreview({
           <div className="flex sm:hidden bg-slate-200/80 rounded-md p-0.5 border border-slate-200 text-[10.5px]">
             <button
               onClick={() => setMobileView("code")}
-              className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
-                mobileView === "code" ? "bg-white text-slate-900 font-semibold shadow-2xs" : "text-slate-600"
-              }`}
+              className={`px-2 py-0.5 rounded transition-all cursor-pointer ${mobileView === "code" ? "bg-white text-slate-900 font-semibold shadow-2xs" : "text-slate-600"
+                }`}
             >
               Code
             </button>
             <button
               onClick={() => setMobileView("preview")}
-              className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
-                mobileView === "preview" ? "bg-white text-slate-900 font-semibold shadow-2xs" : "text-slate-600"
-              }`}
+              className={`px-2 py-0.5 rounded transition-all cursor-pointer ${mobileView === "preview" ? "bg-white text-slate-900 font-semibold shadow-2xs" : "text-slate-600"
+                }`}
             >
               App
             </button>
@@ -604,73 +601,73 @@ export function CodeToLivePreview({
                       </div>
 
                       {/* Code2LiveApplication.java (ACTIVE ROW WITH BLUE ACCENT) */}
-                      <div className="flex items-center gap-1 pl-3 sm:pl-6 pr-1 sm:pr-2 py-0.5 bg-[#37373d] text-white border-l-2 border-[#007acc] font-medium cursor-default truncate">
+                      <div className="flex items-center gap-1.5 pl-3 sm:pl-6 pr-1 sm:pr-2 py-0.5 bg-[#37373d] text-white border-l-2 border-[#007acc] font-medium cursor-default truncate">
                         <Image
-                          src="/icons/Java.png"
+                          src="/icons/Java.svg"
                           alt="Java"
-                          width={12}
-                          height={12}
-                          className="w-2.5 h-2.5 sm:w-3 sm:h-3 object-contain shrink-0"
+                          width={14}
+                          height={14}
+                          className="w-3 h-3 sm:w-3.5 sm:h-3.5 object-contain shrink-0"
                         />
                         <span className="truncate text-blue-200">Code2LiveApp.java</span>
                       </div>
 
                       {/* KafkaPipelineEngine.java */}
-                      <div className="flex items-center gap-1 pl-3 sm:pl-6 pr-1 sm:pr-2 py-0.5 hover:bg-[#2a2d2e] cursor-default truncate text-slate-400">
+                      <div className="flex items-center gap-1.5 pl-3 sm:pl-6 pr-1 sm:pr-2 py-0.5 hover:bg-[#2a2d2e] cursor-default truncate text-slate-400">
                         <Image
-                          src="/icons/Java.png"
+                          src="/icons/Java.svg"
                           alt="Java"
-                          width={12}
-                          height={12}
-                          className="w-2.5 h-2.5 sm:w-3 sm:h-3 object-contain shrink-0"
+                          width={14}
+                          height={14}
+                          className="w-3 h-3 sm:w-3.5 sm:h-3.5 object-contain shrink-0"
                         />
                         <span className="truncate">KafkaPipeline.java</span>
                       </div>
 
                       {/* RedisStateCache.java */}
-                      <div className="flex items-center gap-1 pl-3 sm:pl-6 pr-1 sm:pr-2 py-0.5 hover:bg-[#2a2d2e] cursor-default truncate text-slate-400">
+                      <div className="flex items-center gap-1.5 pl-3 sm:pl-6 pr-1 sm:pr-2 py-0.5 hover:bg-[#2a2d2e] cursor-default truncate text-slate-400">
                         <Image
-                          src="/icons/Java.png"
+                          src="/icons/Java.svg"
                           alt="Java"
-                          width={12}
-                          height={12}
-                          className="w-2.5 h-2.5 sm:w-3 sm:h-3 object-contain shrink-0"
+                          width={14}
+                          height={14}
+                          className="w-3 h-3 sm:w-3.5 sm:h-3.5 object-contain shrink-0"
                         />
                         <span className="truncate">RedisStateCache.java</span>
                       </div>
 
                       {/* DockerSandboxService.java */}
-                      <div className="flex items-center gap-1 pl-3 sm:pl-6 pr-1 sm:pr-2 py-0.5 hover:bg-[#2a2d2e] cursor-default truncate text-slate-400">
+                      <div className="flex items-center gap-1.5 pl-3 sm:pl-6 pr-1 sm:pr-2 py-0.5 hover:bg-[#2a2d2e] cursor-default truncate text-slate-400">
                         <Image
                           src="/icons/Docker.svg"
                           alt="Docker"
-                          width={12}
-                          height={12}
-                          className="w-2.5 h-2.5 sm:w-3 sm:h-3 object-contain shrink-0"
+                          width={14}
+                          height={14}
+                          className="w-3 h-3 sm:w-3.5 sm:h-3.5 object-contain shrink-0"
                         />
                         <span className="truncate">DockerSandbox.java</span>
                       </div>
 
                       {/* WebSocketSessionManager.java */}
-                      <div className="flex items-center gap-1 pl-3 sm:pl-6 pr-1 sm:pr-2 py-0.5 hover:bg-[#2a2d2e] cursor-default truncate text-slate-400">
+                      <div className="flex items-center gap-1.5 pl-3 sm:pl-6 pr-1 sm:pr-2 py-0.5 hover:bg-[#2a2d2e] cursor-default truncate text-slate-400">
                         <Image
-                          src="/icons/Java.png"
+                          src="/icons/Java.svg"
                           alt="Java"
-                          width={12}
-                          height={12}
-                          className="w-2.5 h-2.5 sm:w-3 sm:h-3 object-contain shrink-0"
+                          width={14}
+                          height={14}
+                          className="w-3 h-3 sm:w-3.5 sm:h-3.5 object-contain shrink-0"
                         />
                         <span className="truncate">WebSocketSession.java</span>
                       </div>
 
                       {/* SpringAiPromptController.java */}
-                      <div className="flex items-center gap-1 pl-3 sm:pl-6 pr-1 sm:pr-2 py-0.5 hover:bg-[#2a2d2e] cursor-default truncate text-slate-400">
+                      <div className="flex items-center gap-1.5 pl-3 sm:pl-6 pr-1 sm:pr-2 py-0.5 hover:bg-[#2a2d2e] cursor-default truncate text-slate-400">
                         <Image
-                          src="/icons/Java.png"
+                          src="/icons/Java.svg"
                           alt="Java"
-                          width={12}
-                          height={12}
-                          className="w-2.5 h-2.5 sm:w-3 sm:h-3 object-contain shrink-0"
+                          width={14}
+                          height={14}
+                          className="w-3 h-3 sm:w-3.5 sm:h-3.5 object-contain shrink-0"
                         />
                         <span className="truncate">SpringAiPrompt.java</span>
                       </div>
@@ -716,11 +713,11 @@ export function CodeToLivePreview({
                       <div className="h-7 bg-[#252526] border-b border-[#1e1e1e] flex items-center px-1 shrink-0">
                         <div className="flex items-center gap-1.5 px-3 py-1 bg-[#1e1e1e] border-t-2 border-[#007acc] text-[#ffffff] text-[9px] sm:text-[9.5px] font-sans">
                           <Image
-                            src="/icons/Java.png"
+                            src="/icons/Java.svg"
                             alt="Java"
-                            width={12}
-                            height={12}
-                            className="w-3 h-3 object-contain shrink-0"
+                            width={14}
+                            height={14}
+                            className="w-3.5 h-3.5 object-contain shrink-0"
                           />
                           <span>Code2LiveApplication.java</span>
                         </div>
@@ -874,11 +871,10 @@ export function CodeToLivePreview({
                               {BOOT_LOGS.map((log, i) => (
                                 <div
                                   key={i}
-                                  className={`truncate ${
-                                    log.startsWith("✓")
-                                      ? "text-emerald-300 font-semibold"
-                                      : "text-slate-400"
-                                  }`}
+                                  className={`truncate ${log.startsWith("✓")
+                                    ? "text-emerald-300 font-semibold"
+                                    : "text-slate-400"
+                                    }`}
                                 >
                                   {log}
                                 </div>
@@ -911,28 +907,13 @@ export function CodeToLivePreview({
                     </div>
                   </div>
 
-                  {/* Professional Cloud Infrastructure Status Pill */}
-                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#252526] border border-[#333333] shadow-xs text-[9.5px] font-mono">
-                    {phase !== "live_ready" && (
-                      <span className="relative flex h-2 w-2">
-                        {phase === "ai_generating" ? (
-                          <>
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
-                          </>
-                        ) : (
-                          <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400" />
-                        )}
-                      </span>
-                    )}
-                    <span className="text-[#cccccc] font-medium tracking-wide">
-                      {phase === "prompt_typing"
-                        ? "REQUIREMENT INPUT"
-                        : phase === "prompt_moving_up"
-                          ? "PIPELINE TRIGGERED"
-                          : phase === "ai_generating"
-                            ? "STREAMING AST"
-                            : "READY • code2live.adarshcodes.com"}
+                  {/* Clean, Professional Status Typography (No glowing dot, no rounded box) */}
+                  <div className="text-[10px] sm:text-[11px] font-mono text-slate-400 select-none">
+                    <span className="text-slate-400 font-medium">
+                      {phase === "prompt_typing" && "Requirement Input"}
+                      {phase === "prompt_moving_up" && "Pipeline Triggered"}
+                      {phase === "ai_generating" && "Streaming AST"}
+                      {phase === "live_ready" && "Ready"}
                     </span>
                   </div>
                 </div>
@@ -995,7 +976,7 @@ export function CodeToLivePreview({
                           <div className="flex items-center justify-between px-3 py-1.5 bg-[#252526] border-b border-[#333333] text-[10px] text-slate-400 font-mono">
                             <div className="flex items-center gap-1.5 truncate">
                               <Image
-                                src="/icons/Java.png"
+                                src="/icons/Java.svg"
                                 alt="Java"
                                 width={14}
                                 height={14}
@@ -1032,17 +1013,16 @@ export function CodeToLivePreview({
                             ))}
                           </div>
 
-                          {/* Code Block Footer: DevOps Execution & Deployment Telemetry */}
-                          <div className="flex items-center justify-between px-3 py-1 bg-[#252526] border-t border-[#333333] text-[9.5px] text-[#858585] font-mono">
-                            <span className="flex items-center gap-1.5 text-blue-400">
-                              <Terminal className="w-3 h-3 text-blue-400" />
+                          {/* Code Block Footer: Clean Build Telemetry (No AI-style green pill box) */}
+                          <div className="flex items-center justify-between px-3 py-1.5 bg-[#252526] border-t border-[#333333] text-[9.5px] text-[#858585] font-mono select-none">
+                            <span className="flex items-center gap-1.5 text-slate-400">
+                              <Terminal className="w-3 h-3 text-slate-500" />
                               <span>Topic: {currentProject.topic}</span>
                             </span>
                             {streamIndex >= currentProject.codeLines.length && (
-                              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[#1e2a24] border border-emerald-500/30 text-emerald-300 text-[9px] font-mono shadow-2xs">
-                                <span className="font-semibold text-emerald-300">Live on code2live.adarshcodes.com</span>
-                                <span className="text-emerald-500/80 font-normal">• 0.82s</span>
-                              </div>
+                              <span className="text-slate-400 font-mono text-[9px] sm:text-[9.5px]">
+                                Compiled in 0.82s
+                              </span>
                             )}
                           </div>
                         </div>
@@ -1096,19 +1076,9 @@ export function CodeToLivePreview({
         >
           {/* Sandbox Header */}
           <div className="flex items-center justify-between pb-2 border-b border-slate-200/80 shrink-0 gap-2">
-            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-              <span className="text-xs font-semibold tracking-tight text-slate-900 truncate">
-                <span className="hidden sm:inline">Live Application </span>Preview
-              </span>
-              <a
-                href="https://code2live.adarshcodes.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white hover:bg-slate-50 text-slate-700 hover:text-blue-600 border border-slate-200 shadow-2xs font-mono text-[9.5px] transition-colors cursor-pointer"
-              >
-                <span className="font-medium">code2live.adarshcodes.com</span>
-              </a>
-            </div>
+            <span className="text-xs font-semibold tracking-tight text-slate-900 truncate">
+              <span className="hidden sm:inline">Live Application </span>Preview
+            </span>
 
             {/* View Switcher Tabs */}
             <div className="flex gap-1 bg-slate-200/70 p-0.5 rounded-lg border border-slate-200 text-[10px] shrink-0">
@@ -1167,8 +1137,8 @@ export function CodeToLivePreview({
                           <div className="text-[9.5px] text-slate-400 font-mono">Live Web Preview Engine</div>
                         </div>
                       </div>
-                      <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 flex items-center gap-1.5 shadow-2xs">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                      <div className="text-[10px] font-mono text-slate-500 flex items-center gap-1.5 select-none">
+                        <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
                         <span>
                           {phase === "ide_view" && "System Standby"}
                           {phase === "cursor_moving" && "Terminal Routing"}
@@ -1177,7 +1147,7 @@ export function CodeToLivePreview({
                           {phase === "prompt_typing" && "Awaiting Requirement"}
                           {phase === "prompt_moving_up" && "Triggering Pipeline"}
                         </span>
-                      </span>
+                      </div>
                     </div>
 
                     {/* Center Ambient Orchestration Animation */}
@@ -1196,10 +1166,6 @@ export function CodeToLivePreview({
                             <Activity className="w-6 h-6 text-slate-500" />
                           )}
                         </div>
-                        <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
-                          <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500" />
-                        </span>
                       </div>
 
                       {/* Status Headlines */}
@@ -1240,12 +1206,12 @@ export function CodeToLivePreview({
                     {/* Bottom Telemetry Strip */}
                     <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-[9.5px] font-mono text-slate-500 relative z-10">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-slate-400">DOMAIN:</span>
-                        <span className="text-slate-800 font-medium font-mono">code2live.adarshcodes.com</span>
+                        <span className="text-slate-400">PIPELINE:</span>
+                        <span className="text-slate-700 font-medium">EVENT-DRIVEN</span>
                       </div>
                       <div className="flex items-center gap-2.5">
                         <span>KAFKA: READY</span>
-                        <span className="text-emerald-600 font-semibold">PREVIEW: HOT-RELOAD</span>
+                        <span className="text-emerald-600 font-semibold">HOT-RELOAD</span>
                       </div>
                     </div>
                   </motion.div>
@@ -1271,7 +1237,7 @@ export function CodeToLivePreview({
                               <div className="text-[9px] sm:text-[9.5px] text-slate-400 font-mono truncate">Live WebSocket Session #842</div>
                             </div>
                           </div>
-                          <span className="text-[9px] sm:text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0 truncate max-w-[150px] sm:max-w-none text-right">
+                          <span className="text-[9.5px] sm:text-[10.5px] font-mono font-medium text-emerald-700 shrink-0 truncate max-w-[150px] sm:max-w-none text-right">
                             {gameMessage}
                           </span>
                         </div>
@@ -1344,7 +1310,7 @@ export function CodeToLivePreview({
                               <div className="text-[9.5px] text-slate-400 font-mono">Kafka Event Stream #412</div>
                             </div>
                           </div>
-                          <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                          <span className="text-[9.5px] sm:text-[10px] font-mono font-medium text-slate-500">
                             {kanbanStage === 0 && "Task #104 moved to 'In Progress'"}
                             {kanbanStage === 1 && "Task #102 deployed to 'Done'"}
                             {kanbanStage === 2 && "Synchronized with 12 WebSocket clients"}
@@ -1486,18 +1452,6 @@ export function CodeToLivePreview({
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
-
-          {/* Sandbox Footer Bar */}
-          <div className="pt-2 border-t border-slate-200/80 flex items-center justify-between text-[9.5px] sm:text-[10.5px] text-slate-500 font-mono shrink-0">
-            <span className="flex items-center gap-1.5 truncate">
-              <Layers className="w-3 h-3 text-blue-600 shrink-0" />
-              <span className="hidden sm:inline">Container: </span>
-              <span className="truncate">isolated-k8s</span>
-            </span>
-            <span className="text-slate-400 shrink-0 text-right">
-              Node 20 • Fastify<span className="hidden sm:inline"> • Synced</span>
-            </span>
           </div>
         </div>
       </div>
