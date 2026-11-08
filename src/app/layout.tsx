@@ -15,8 +15,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const viewport: Viewport = {
-  themeColor: "#0F172A",
-  colorScheme: "light dark",
+  themeColor: "#171717",
+  colorScheme: "light",
   width: "device-width",
   initialScale: 1,
 };
@@ -26,7 +26,7 @@ const SITE_URL = "https://code2live.adarshcodes.com";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Code2Live | Adarsh Kumar",
+    default: "Code2Live",
     template: "%s | Code2Live",
   },
   description:
@@ -99,10 +99,12 @@ export const metadata: Metadata = {
   classification: "Software Development / Developer Tools / Cloud Platform",
   icons: {
     icon: [
+      { url: "/icon.png" },
       { url: "/icon.png", sizes: "32x32", type: "image/png" },
       { url: "/icon.png", sizes: "192x192", type: "image/png" },
     ],
-    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+    shortcut: "/icon.png",
+    apple: [{ url: "/icon.png", sizes: "180x180", type: "image/png" }],
   },
 };
 
@@ -174,7 +176,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
       </head>
-      <body className="min-h-full flex flex-col bg-white text-slate-900 font-sans">
+      <body className="min-h-full flex flex-col bg-[#fafafa] text-[#171717] font-sans">
         {children}
       </body>
     </html>

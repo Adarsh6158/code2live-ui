@@ -3,287 +3,359 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import {
-  Sparkles,
+  User,
+  Search,
+  Star,
+  Clock,
+  Plus,
+  Check,
+  ShoppingBag,
+  X,
+  ArrowRight,
+  MapPin,
+  Flame,
   Terminal,
   FileCode,
-  CheckCircle2,
-  Activity,
-  Cpu,
-  Clock,
-  Radio,
+  Layers,
+  ChevronRight,
   ChevronDown,
-  Search,
-  Settings,
-  GitBranch,
-  Send,
-  User,
-  Dice5,
+  Folder,
+  FolderOpen,
+  Calendar,
   Kanban,
+  RotateCw,
+  Cpu,
+  Boxes,
+  CheckCircle2,
+  Code2,
+  Circle,
+  CircleDot,
+  Filter,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  BITECRAFT_FILES,
+  FLOWBOARD_FILES,
+  BITECRAFT_TREE,
+  FLOWBOARD_TREE,
+  TreeNode,
+  ProjectFile,
+} from "@/data/ideFiles";
+import { getSprintForDate, SprintInfo } from "@/utils/sprint";
+
+export type AppType = "bitecraft" | "flowboard";
+
+const BITECRAFT_GENERATION_SEQUENCE = [
+  "src/App.jsx",
+  "src/components/Navbar.jsx",
+  "src/components/RestaurantCard.jsx",
+  "src/components/Cart.jsx",
+];
+
+const FLOWBOARD_GENERATION_SEQUENCE = [
+  "src/App.jsx",
+  "src/components/KanbanBoard.jsx",
+  "src/components/Column.jsx",
+  "src/components/TaskCard.jsx",
+];
 
 interface CodeToLivePreviewProps {
   isReplaying?: boolean;
   onReplayComplete?: () => void;
+  initialApp?: AppType;
+  onAppChange?: (app: AppType) => void;
 }
 
-type DemoPhase =
-  | "ide_view"
-  | "cursor_moving"
-  | "typing_mvn"
-  | "booting_spring"
-  | "prompt_typing"
-  | "prompt_moving_up"
-  | "ai_generating"
-  | "live_ready";
+export type GenerationState =
+  | "IDLE"
+  | "PROMPT_SUBMITTED"
+  | "ANALYZING"
+  | "GENERATING_CODE"
+  | "BUILDING"
+  | "READY"
+  | "PREVIEW_VISIBLE";
 
-interface CodeLine {
-  num: number;
-  tokens: { text: string; color: string }[];
-}
-
-interface ShowcaseProject {
+interface RestaurantItem {
   id: string;
   name: string;
-  prompt: string;
-  mainFile: string;
-  topic: string;
-  codeLines: CodeLine[];
+  category: "Burgers" | "Pizza" | "Biryani";
+  rating: number;
+  reviews: string;
+  time: string;
+  delivery: string;
+  featuredItem: string;
+  price: number;
+  image: string;
+  badge: string;
 }
 
-const SPRING_BANNER = [
-  "  .   ____          _            __ _ _",
-  " /\\\\ / ___'_ __ _ _(_)_ __  __ _ \\ \\ \\ \\",
-  "( ( )\\___ | '_ | '_| | '_ \\/ _` | \\ \\ \\ \\",
-  " \\\\/  ___)| |_)| | | | | || (_| |  ) ) ) )",
-  "  '  |____| .__|_| |_|_| |_\\__, | / / / /",
-  " =========|_|==============|___/=/_/_/_/",
-  " :: Spring Boot :: (v3.3.4)",
-];
-
-const BOOT_LOGS = [
-  "[INFO] Initializing Spring AI Multi-Agent Pipeline",
-  "[INFO] Connected to Kafka Broker (topic: codegen.req)",
-  "[INFO] Tomcat started on port 8080 (http) with context ''",
-  "✓ Started Code2LiveApplication in 0.82 seconds",
-];
-
-const SHOWCASE_PROJECTS: ShowcaseProject[] = [
+const BITECRAFT_RESTAURANTS: RestaurantItem[] = [
   {
-    id: "snake_ladder",
-    name: "Snake & Ladder Multiplayer",
-    prompt: "Create a real-time Snake and Ladder game with multiplayer WebSockets & interactive board",
-    mainFile: "SnakeLadderEngine.java",
-    topic: "/topic/board-state",
-    codeLines: [
-      {
-        num: 1,
-        tokens: [
-          { text: "@RestController", color: "text-amber-400 font-semibold" },
-          { text: ' @RequestMapping("/api/snake-ladder")', color: "text-emerald-400 font-medium" },
-        ],
-      },
-      {
-        num: 2,
-        tokens: [
-          { text: "public class ", color: "text-purple-400 font-medium" },
-          { text: "SnakeLadderEngine ", color: "text-blue-300 font-bold" },
-          { text: "implements ", color: "text-purple-400 font-medium" },
-          { text: "GameSession ", color: "text-cyan-300 font-semibold" },
-          { text: "{", color: "text-slate-300" },
-        ],
-      },
-      {
-        num: 3,
-        tokens: [
-          { text: "  @Autowired ", color: "text-amber-400 font-medium" },
-          { text: "private SimpMessagingTemplate template;", color: "text-slate-200" },
-        ],
-      },
-      {
-        num: 4,
-        tokens: [
-          { text: "  private final Map<Integer, Integer> snakes = Map.of(", color: "text-slate-300" },
-          { text: "99, 10, 75, 30, 52, 16", color: "text-amber-300 font-mono" },
-          { text: ");", color: "text-slate-300" },
-        ],
-      },
-      {
-        num: 5,
-        tokens: [
-          { text: "  private final Map<Integer, Integer> ladders = Map.of(", color: "text-slate-300" },
-          { text: "4, 25, 21, 60, 42, 81", color: "text-emerald-300 font-mono" },
-          { text: ");", color: "text-slate-300" },
-        ],
-      },
-      {
-        num: 6,
-        tokens: [
-          { text: "  @MessageMapping(\"/roll\")", color: "text-amber-400 font-medium" },
-          { text: "  @SendTo(\"/topic/board-state\")", color: "text-amber-400 font-medium" },
-        ],
-      },
-      {
-        num: 7,
-        tokens: [
-          { text: "  public GameState ", color: "text-purple-400 font-medium" },
-          { text: "rollDice", color: "text-blue-400 font-bold" },
-          { text: "(PlayerMove move) {", color: "text-slate-300" },
-        ],
-      },
-      {
-        num: 8,
-        tokens: [
-          { text: "    int dice = ThreadLocalRandom.current().nextInt(1, 7);", color: "text-slate-200" },
-        ],
-      },
-      {
-        num: 9,
-        tokens: [
-          { text: "    int target = calculateNextCell(move.getCurrent(), dice);", color: "text-slate-200" },
-        ],
-      },
-      {
-        num: 10,
-        tokens: [
-          { text: "    return new GameState(move.getPlayerId(), dice, target, checkWin(target));", color: "text-emerald-300 font-semibold" },
-        ],
-      },
-      {
-        num: 11,
-        tokens: [{ text: "  }", color: "text-slate-300" }],
-      },
-      {
-        num: 12,
-        tokens: [{ text: "}", color: "text-slate-300" }],
-      },
-    ],
+    id: "rest-1",
+    name: "Leon's Burgers & Wings",
+    category: "Burgers",
+    rating: 4.8,
+    reviews: "1.4k",
+    time: "20-25 min",
+    delivery: "Free",
+    featuredItem: "Crispy Peri Peri Paneer Burger",
+    price: 249,
+    image: "/images/restaurants/burger.jpg",
+    badge: "Bestseller",
   },
   {
-    id: "kanban_board",
-    name: "Collaborative Kanban Platform",
-    prompt: "Build real-time Kanban board with Kafka event streaming, WebSocket sync & live drag-drop",
-    mainFile: "KanbanEventPipeline.java",
-    topic: "/topic/kanban-updates",
-    codeLines: [
-      {
-        num: 1,
-        tokens: [
-          { text: "@RestController", color: "text-amber-400 font-semibold" },
-          { text: ' @RequestMapping("/api/kanban")', color: "text-emerald-400 font-medium" },
-        ],
-      },
-      {
-        num: 2,
-        tokens: [
-          { text: "public class ", color: "text-purple-400 font-medium" },
-          { text: "KanbanEventPipeline ", color: "text-blue-300 font-bold" },
-          { text: "extends ", color: "text-purple-400 font-medium" },
-          { text: "EventBridge ", color: "text-cyan-300 font-semibold" },
-          { text: "{", color: "text-slate-300" },
-        ],
-      },
-      {
-        num: 3,
-        tokens: [
-          { text: "  @Autowired ", color: "text-amber-400 font-medium" },
-          { text: "private KafkaTemplate<String, TaskEvent> kafka;", color: "text-slate-200" },
-        ],
-      },
-      {
-        num: 4,
-        tokens: [
-          { text: "  @Autowired ", color: "text-amber-400 font-medium" },
-          { text: "private SimpMessagingTemplate wsTemplate;", color: "text-slate-200" },
-        ],
-      },
-      {
-        num: 5,
-        tokens: [
-          { text: "  @KafkaListener", color: "text-amber-400 font-medium" },
-          { text: '(topics = "', color: "text-slate-300" },
-          { text: "kanban.events", color: "text-emerald-300" },
-          { text: '", groupId = "code2live-ui")', color: "text-slate-300" },
-        ],
-      },
-      {
-        num: 6,
-        tokens: [
-          { text: "  @MessageMapping(\"/task/move\")", color: "text-amber-400 font-medium" },
-          { text: "  @SendTo(\"/topic/kanban-updates\")", color: "text-amber-400 font-medium" },
-        ],
-      },
-      {
-        num: 7,
-        tokens: [
-          { text: "  public TaskState ", color: "text-purple-400 font-medium" },
-          { text: "handleTaskMove", color: "text-blue-400 font-bold" },
-          { text: "(TaskMovePayload payload) {", color: "text-slate-300" },
-        ],
-      },
-      {
-        num: 8,
-        tokens: [
-          { text: "    kafka.send(\"kanban.events\", payload.getTaskId(), payload);", color: "text-slate-200" },
-        ],
-      },
-      {
-        num: 9,
-        tokens: [
-          { text: "    TaskState state = taskService.transition(payload);", color: "text-slate-200" },
-        ],
-      },
-      {
-        num: 10,
-        tokens: [
-          { text: "    return state.withBroadcastTimestamp(Instant.now());", color: "text-emerald-300 font-semibold" },
-        ],
-      },
-      {
-        num: 11,
-        tokens: [{ text: "  }", color: "text-slate-300" }],
-      },
-      {
-        num: 12,
-        tokens: [{ text: "}", color: "text-slate-300" }],
-      },
-    ],
+    id: "rest-2",
+    name: "Brik Oven Pizzeria",
+    category: "Pizza",
+    rating: 4.9,
+    reviews: "2.1k",
+    time: "25-35 min",
+    delivery: "₹35",
+    featuredItem: "Paneer Tikka Woodfired Pizza",
+    price: 429,
+    image: "/images/restaurants/pizza.jpg",
+    badge: "Chef's Special",
+  },
+  {
+    id: "rest-3",
+    name: "Meghana Foods",
+    category: "Biryani",
+    rating: 4.9,
+    reviews: "5.8k",
+    time: "15-20 min",
+    delivery: "Free",
+    featuredItem: "Meghana Special Biryani",
+    price: 329,
+    image: "/images/restaurants/biryani.jpg",
+    badge: "Bengaluru Icon",
   },
 ];
 
-const MVN_COMMAND = "./mvnw spring-boot:run";
+interface KanbanTask {
+  id: string;
+  key: string;
+  title: string;
+  tag: string;
+  description: string;
+  status: "todo" | "in_progress" | "done";
+  priority: "High" | "Medium" | "Low";
+  dueDate: string;
+  assignee: { name: string; initials: string };
+}
+
+const FLOWBOARD_INITIAL_TASKS: KanbanTask[] = [
+  {
+    id: "task-1",
+    key: "FLOW-104",
+    title: "Implement OAuth 2.0 PKCE Auth Flow",
+    tag: "Security",
+    description: "Secure API gateway with RFC 7636 authorization code grant.",
+    status: "todo",
+    priority: "High",
+    dueDate: "Nov 12",
+    assignee: { name: "Adarsh Kumar", initials: "AK" },
+  },
+  {
+    id: "task-2",
+    key: "FLOW-98",
+    title: "Kafka Event Schema Registry Contracts",
+    tag: "Streaming",
+    description: "Publish Avro contracts for code generation streaming.",
+    status: "in_progress",
+    priority: "High",
+    dueDate: "Today",
+    assignee: { name: "Sarah Miller", initials: "SM" },
+  },
+  {
+    id: "task-3",
+    key: "FLOW-87",
+    title: "Export Figma Design System Tokens",
+    tag: "Design",
+    description: "Export CSS variables for neutral dark & light palettes.",
+    status: "in_progress",
+    priority: "Medium",
+    dueDate: "Tomorrow",
+    assignee: { name: "Rohan Verma", initials: "RV" },
+  },
+  {
+    id: "task-4",
+    key: "FLOW-72",
+    title: "KEDA Sandbox Autoscaler Configuration",
+    tag: "DevOps",
+    description: "Deploy KEDA metrics for container worker nodes.",
+    status: "done",
+    priority: "Low",
+    dueDate: "Done",
+    assignee: { name: "Adarsh Kumar", initials: "AK" },
+  },
+  {
+    id: "task-5",
+    key: "FLOW-112",
+    title: "AST Code Streaming WebSocket Handler",
+    tag: "Backend",
+    description: "Stream syntax tokens to browser over bi-directional socket.",
+    status: "todo",
+    priority: "High",
+    dueDate: "Nov 14",
+    assignee: { name: "Sarah Miller", initials: "SM" },
+  },
+];
+
+function renderSyntaxHighlight(line: string) {
+  if (line.trim().startsWith("//") || line.trim().startsWith("/*")) {
+    return <span className="text-[#6e7681] italic">{line}</span>;
+  }
+  const tokenRegex =
+    /(".*?"|'.*?'|`.*?`|\b(?:import|export|default|from|function|return|const|let|var|if|else|switch|case|break)\b|<\/?[A-Za-z0-9_.-]+|\b(?:true|false|null|undefined|\d+)\b|[{}()[\].,;:])/g;
+
+  const parts: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = tokenRegex.exec(line)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(line.substring(lastIndex, match.index));
+    }
+    const token = match[0];
+    if (token.startsWith('"') || token.startsWith("'") || token.startsWith("`")) {
+      parts.push(
+        <span key={match.index} className="text-[#a5d6ff]">
+          {token}
+        </span>
+      );
+    } else if (
+      /^(?:import|export|default|from|return|function)$/.test(token)
+    ) {
+      parts.push(
+        <span key={match.index} className="text-[#ff7b72] font-medium">
+          {token}
+        </span>
+      );
+    } else if (/^(?:const|let|var)$/.test(token)) {
+      parts.push(
+        <span key={match.index} className="text-[#79c0ff]">
+          {token}
+        </span>
+      );
+    } else if (/^(?:true|false|null|undefined|\d+)$/.test(token)) {
+      parts.push(
+        <span key={match.index} className="text-[#d2a8ff]">
+          {token}
+        </span>
+      );
+    } else if (token.startsWith("<")) {
+      parts.push(
+        <span key={match.index} className="text-[#7ee787]">
+          {token}
+        </span>
+      );
+    } else {
+      parts.push(
+        <span key={match.index} className="text-[#8b949e]">
+          {token}
+        </span>
+      );
+    }
+    lastIndex = tokenRegex.lastIndex;
+  }
+
+  if (lastIndex < line.length) {
+    parts.push(line.substring(lastIndex));
+  }
+
+  return (
+    <span className="text-[#e6edf3]">
+      {parts.length > 0 ? parts : line}
+    </span>
+  );
+}
 
 export function CodeToLivePreview({
   isReplaying = false,
   onReplayComplete,
+  initialApp,
+  onAppChange,
 }: CodeToLivePreviewProps) {
-  const [projectIndex, setProjectIndex] = useState(0);
-  const currentProject = SHOWCASE_PROJECTS[projectIndex];
+  const getInitialApp = (): AppType => {
+    if (initialApp) return initialApp;
+    if (typeof window !== "undefined") {
+      const path = window.location.pathname;
+      if (path === "/kanban") return "flowboard";
+      if (path === "/food") return "bitecraft";
+    }
+    return "bitecraft";
+  };
 
-  const [phase, setPhase] = useState<DemoPhase>("ide_view");
-  const [typedCommand, setTypedCommand] = useState("");
-  const [typedPrompt, setTypedPrompt] = useState("");
-  const [streamIndex, setStreamIndex] = useState(0);
-  const [activeTab, setActiveTab] = useState<"app" | "telemetry">("app");
-  const [mobileView, setMobileView] = useState<"code" | "preview">("code");
+  const [appType, setAppType] = useState<AppType>(getInitialApp);
+  const [generationState, setGenerationState] = useState<GenerationState>("IDLE");
+  const [mobileTab, setMobileTab] = useState<"chat" | "preview" | "code">("preview");
 
-  // Dice simulation state for Snake & Ladder
-  const [diceValue, setDiceValue] = useState(6);
-  const [playerPosition, setPlayerPosition] = useState(42);
-  const [gameMessage, setGameMessage] = useState("Climbed Ladder to Cell 81!");
+  const [typedUserPrompt, setTypedUserPrompt] = useState("");
+  const [typedAiResponse, setTypedAiResponse] = useState("");
 
-  // Kanban simulation state
-  const [kanbanStage, setKanbanStage] = useState(0);
+  const [activeFilePath, setActiveFilePath] = useState<string>("");
+  const [generatedFiles, setGeneratedFiles] = useState<string[]>([]);
+  const [currentGeneratingFile, setCurrentGeneratingFile] = useState<string | null>(null);
+  const [isFilesOpen, setIsFilesOpen] = useState<boolean>(false);
+  const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({
+    src: true,
+    "src/components": true,
+    "src/data": true,
+    "src/hooks": false,
+    "src/styles": false,
+  });
+  const [generatedCodeLineCount, setGeneratedCodeLineCount] = useState<number>(0);
+
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [cartItems, setCartItems] = useState<{ id: string; name: string; price: number }[]>([
+    { id: "init-1", name: "Crispy Peri Peri Paneer Burger", price: 249 },
+    { id: "init-2", name: "Paneer Tikka Woodfired Pizza", price: 429 },
+  ]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [addedNoticeId, setAddedNoticeId] = useState<string | null>(null);
+
+  const [kanbanTasks, setKanbanTasks] = useState<KanbanTask[]>(FLOWBOARD_INITIAL_TASKS);
+  const [flowboardView, setFlowboardView] = useState<"board" | "list">("board");
+  const [taskFilter, setTaskFilter] = useState<string>("All");
+  const [sprintInfo, setSprintInfo] = useState<SprintInfo>(() =>
+    getSprintForDate("2026-11-04")
+  );
+
+  useEffect(() => {
+    const updateSprint = () => {
+      setSprintInfo(getSprintForDate());
+    };
+    updateSprint();
+
+    const interval = setInterval(updateSprint, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   const timeoutsRef = useRef<NodeJS.Timeout[]>([]);
   const intervalsRef = useRef<NodeJS.Timeout[]>([]);
-  const chatScrollRef = useRef<HTMLDivElement>(null);
+  const dwellTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const dwellSecondsLeftRef = useRef<number>(8);
+  const isDwellActiveRef = useRef<boolean>(false);
+  const lastUserInteractionTimeRef = useRef<number>(0);
+  const completedCountRef = useRef<number>(0);
+  const codeEditorRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (generationState === "GENERATING_CODE" && codeEditorRef.current) {
+      codeEditorRef.current.scrollTop = codeEditorRef.current.scrollHeight;
+    }
+  }, [generatedCodeLineCount, generationState]);
 
   const clearAllTimers = useCallback(() => {
     timeoutsRef.current.forEach((t) => clearTimeout(t));
     timeoutsRef.current = [];
     intervalsRef.current.forEach((i) => clearInterval(i));
     intervalsRef.current = [];
+    if (dwellTimerRef.current) {
+      clearInterval(dwellTimerRef.current);
+      dwellTimerRef.current = null;
+    }
   }, []);
 
   const addTimeout = useCallback((fn: () => void, ms: number) => {
@@ -298,1160 +370,1587 @@ export function CodeToLivePreview({
     return i;
   }, []);
 
-  const startSequence = useCallback(
-    (projIdx: number) => {
+  const recordUserInteraction = useCallback(() => {
+    lastUserInteractionTimeRef.current = Date.now();
+  }, []);
+
+  const activeFilesMap: Record<string, ProjectFile> =
+    appType === "bitecraft" ? BITECRAFT_FILES : FLOWBOARD_FILES;
+  const activeTree: TreeNode[] =
+    appType === "bitecraft" ? BITECRAFT_TREE : FLOWBOARD_TREE;
+
+  const promptText =
+    appType === "bitecraft"
+      ? "Build a modern food delivery application with restaurant listings, food categories, and an interactive shopping cart."
+      : "Build a modern project management application with a Kanban board, task priorities, team avatars, and interactive status columns.";
+
+  const responseText =
+    appType === "bitecraft"
+      ? "I'll build a responsive food delivery experience with restaurant discovery, interactive menus, and cart functionality."
+      : "I'll build FlowBoard: a responsive project management platform with customizable Kanban columns, priority tags, member assignees, and real-time task state management.";
+
+  const startLifecycle = useCallback(
+    (targetApp: AppType) => {
       clearAllTimers();
-      setPhase("ide_view");
-      setTypedCommand("");
-      setTypedPrompt("");
-      setStreamIndex(0);
+      setAppType(targetApp);
+      if (onAppChange) {
+        onAppChange(targetApp);
+      }
+      setGenerationState("PROMPT_SUBMITTED");
+      setTypedUserPrompt("");
+      setTypedAiResponse("");
+      setGeneratedFiles([]);
+      setCurrentGeneratingFile(null);
+      setGeneratedCodeLineCount(0);
+      setActiveFilePath("");
+      setIsFilesOpen(false);
+      setIsCartOpen(false);
 
-      const proj = SHOWCASE_PROJECTS[projIdx];
+      if (targetApp === "bitecraft") {
+        setSelectedCategory("All");
+        setSearchQuery("");
+      } else {
+        setKanbanTasks(FLOWBOARD_INITIAL_TASKS);
+        setFlowboardView("board");
+      }
 
-      // Phase 1 -> 2: Let user admire VS Code Spring Boot workstation (1.8s)
-      addTimeout(() => {
-        setPhase("cursor_moving");
+      let p = 0;
+      const targetPrompt =
+        targetApp === "bitecraft"
+          ? "Build a modern food delivery application with restaurant listings, food categories, and an interactive shopping cart."
+          : "Build a modern project management application with a Kanban board, task priorities, team avatars, and interactive status columns.";
 
-        // Cursor glides down directly to TERMINAL tab over 1.3s and taps it
-        addTimeout(() => {
-          setPhase("typing_mvn");
+      const pInterval = addInterval(() => {
+        p += 2;
+        setTypedUserPrompt(targetPrompt.slice(0, p));
+        if (p >= targetPrompt.length) {
+          clearInterval(pInterval);
 
-          // Type `./mvnw spring-boot:run` at deliberate, realistic speed (~70ms per char)
-          let c = 0;
-          const typeInterval = addInterval(() => {
-            c++;
-            setTypedCommand(MVN_COMMAND.slice(0, c));
-            if (c >= MVN_COMMAND.length) {
-              clearInterval(typeInterval);
+          addTimeout(() => {
+            setGenerationState("ANALYZING");
 
-              // 600ms pause after command is typed (simulating pressing Enter)
-              addTimeout(() => {
-                setPhase("booting_spring");
+            let a = 0;
+            const targetResponse =
+              targetApp === "bitecraft"
+                ? "I'll build a responsive food delivery experience with restaurant discovery, interactive menus, and cart functionality."
+                : "I'll build FlowBoard: a responsive project management platform with customizable Kanban columns, priority tags, member assignees, and real-time task state management.";
 
-                // Keep Spring Boot banner & logs readable for 2.8 seconds!
+            const aInterval = addInterval(() => {
+              a += 2;
+              setTypedAiResponse(targetResponse.slice(0, a));
+              if (a >= targetResponse.length) {
+                clearInterval(aInterval);
+
                 addTimeout(() => {
-                  setPhase("prompt_typing");
+                  setGenerationState("GENERATING_CODE");
+                  const sequence =
+                    targetApp === "bitecraft"
+                      ? BITECRAFT_GENERATION_SEQUENCE
+                      : FLOWBOARD_GENERATION_SEQUENCE;
+                  const targetFileMap =
+                    targetApp === "bitecraft" ? BITECRAFT_FILES : FLOWBOARD_FILES;
 
-                  // Type project prompt into ChatGPT input box (1 char every 30ms)
-                  let p = 0;
-                  const promptInterval = addInterval(() => {
-                    p++;
-                    setTypedPrompt(proj.prompt.slice(0, p));
-                    if (p >= proj.prompt.length) {
-                      clearInterval(promptInterval);
+                  const generateFileAtIndex = (index: number) => {
+                    if (index >= sequence.length) {
+                      setCurrentGeneratingFile(null);
+                      setActiveFilePath("src/App.jsx");
 
-                      // 450ms pause then SEND the prompt -> prompt animates slowly up into chat feed!
                       addTimeout(() => {
-                        setPhase("prompt_moving_up");
+                        setGenerationState("BUILDING");
 
-                        // 650ms for prompt to glide up into conversation, then AI begins generating below
                         addTimeout(() => {
-                          setPhase("ai_generating");
+                          setGenerationState("READY");
 
-                          // Stream code line-by-line one-by-one like ChatGPT streaming (1 line every 120ms)
-                          let line = 0;
-                          const streamInterval = addInterval(() => {
-                            line++;
-                            setStreamIndex(line);
-                            if (line >= proj.codeLines.length) {
-                              clearInterval(streamInterval);
-
-                              // 500ms pause after all lines are generated -> Live Ready App!
-                              addTimeout(() => {
-                                setPhase("live_ready");
-                                if (onReplayComplete) onReplayComplete();
-
-                                // Stay on live demo for 7.5 SECONDS before rotating to next project
-                                addTimeout(() => {
-                                  setProjectIndex((prev) => (prev + 1) % SHOWCASE_PROJECTS.length);
-                                }, 7500);
-                              }, 500);
-                            }
-                          }, 120);
-                        }, 650);
-                      }, 450);
+                          addTimeout(() => {
+                            setGenerationState("PREVIEW_VISIBLE");
+                            completedCountRef.current += 1;
+                            if (onReplayComplete) onReplayComplete();
+                          }, 800);
+                        }, 1400);
+                      }, 400);
+                      return;
                     }
-                  }, 30);
-                }, 2800);
-              }, 600);
-            }
-          }, 70);
-        }, 1300);
-      }, 1800);
+
+                    const nextFile = sequence[index];
+                    setGeneratedFiles((prev) =>
+                      prev.includes(nextFile) ? prev : [...prev, nextFile]
+                    );
+                    setActiveFilePath(nextFile);
+                    setCurrentGeneratingFile(nextFile);
+                    setGeneratedCodeLineCount(0);
+
+                    const fileObj = targetFileMap[nextFile];
+                    const totalLines = fileObj?.lines.length || 24;
+                    let lineCount = 0;
+
+                    const lineInterval = addInterval(() => {
+                      lineCount = Math.min(lineCount + 2, totalLines);
+                      setGeneratedCodeLineCount(lineCount);
+
+                      if (lineCount >= totalLines) {
+                        clearInterval(lineInterval);
+                        addTimeout(() => {
+                          generateFileAtIndex(index + 1);
+                        }, 250);
+                      }
+                    }, 38);
+                  };
+
+                  generateFileAtIndex(0);
+                }, 700);
+              }
+            }, 38);
+          }, 600);
+        }
+      }, 28);
     },
-    [addInterval, addTimeout, clearAllTimers, onReplayComplete]
+    [addInterval, addTimeout, clearAllTimers, onAppChange, onReplayComplete]
   );
 
-  // Trigger sequence whenever projectIndex changes
+  const hasMountedRef = useRef(false);
+  const startLifecycleRef = useRef(startLifecycle);
+
   useEffect(() => {
-    const t = setTimeout(() => {
-      startSequence(projectIndex);
-    }, 50);
+    startLifecycleRef.current = startLifecycle;
+  }, [startLifecycle]);
 
-    return () => {
-      clearTimeout(t);
-      clearAllTimers();
-    };
-  }, [projectIndex, startSequence, clearAllTimers]);
-
-  // Handle explicit Replay button click from parent
   useEffect(() => {
-    if (!isReplaying) return;
-    const t = setTimeout(() => {
-      startSequence(projectIndex);
-    }, 10);
-    return () => clearTimeout(t);
-  }, [isReplaying, projectIndex, startSequence]);
+    if (hasMountedRef.current) return;
+    hasMountedRef.current = true;
+    const resolvedApp: AppType = initialApp || "bitecraft";
+    startLifecycleRef.current(resolvedApp);
+  }, [initialApp]);
 
-  // Periodic dice roll in live ready state for Snake & Ladder
   useEffect(() => {
-    if (phase !== "live_ready" || currentProject.id !== "snake_ladder") return;
-
-    const interval = setInterval(() => {
-      const roll = Math.floor(Math.random() * 6) + 1;
-      setDiceValue(roll);
-      setPlayerPosition((prev) => {
-        const next = prev + roll > 100 ? prev + roll - 100 : prev + roll;
-        if (next === 52) setGameMessage("Bitten by Snake! Down to 16");
-        else if (next === 21) setGameMessage("Climbed Ladder to 60!");
-        else setGameMessage(`Player rolled ${roll} • Moved to cell ${next}`);
-        return next;
-      });
-    }, 2400);
-
-    return () => clearInterval(interval);
-  }, [phase, currentProject.id]);
-
-  // Periodic card moves in live ready state for Kanban Board
-  useEffect(() => {
-    if (phase !== "live_ready" || currentProject.id !== "kanban_board") return;
-
-    const interval = setInterval(() => {
-      setKanbanStage((prev) => (prev + 1) % 3);
-    }, 2400);
-
-    return () => clearInterval(interval);
-  }, [phase, currentProject.id]);
-
-  // Auto-scroll ChatGPT conversation stream smoothly as prompt types and code streams
-  useEffect(() => {
-    if (chatScrollRef.current) {
-      chatScrollRef.current.scrollTo({
-        top: chatScrollRef.current.scrollHeight,
-        behavior: "smooth",
-      });
+    if (isReplaying) {
+      const timer = setTimeout(() => {
+        startLifecycleRef.current(appType);
+      }, 50);
+      return () => clearTimeout(timer);
     }
-  }, [typedPrompt, streamIndex, phase]);
+  }, [isReplaying, appType]);
+
+  useEffect(() => {
+    if (generationState !== "PREVIEW_VISIBLE") {
+      return;
+    }
+
+    dwellSecondsLeftRef.current = 20;
+    isDwellActiveRef.current = true;
+
+    const nextApp: AppType = appType === "bitecraft" ? "flowboard" : "bitecraft";
+
+    const interval = setInterval(() => {
+      if (document.hidden) {
+        return;
+      }
+
+      const isUserBusy = Date.now() - lastUserInteractionTimeRef.current < 2500;
+      if (isUserBusy) {
+        return;
+      }
+
+      dwellSecondsLeftRef.current -= 1;
+      if (dwellSecondsLeftRef.current <= 0) {
+        clearInterval(interval);
+        isDwellActiveRef.current = false;
+        startLifecycleRef.current(nextApp);
+      }
+    }, 1000);
+
+    dwellTimerRef.current = interval;
+    return () => {
+      clearInterval(interval);
+      dwellTimerRef.current = null;
+    };
+  }, [generationState, appType]);
+
+  const toggleFolder = (folderPath: string) => {
+    setExpandedFolders((prev) => ({
+      ...prev,
+      [folderPath]: !prev[folderPath],
+    }));
+  };
+
+  const handleAddToCart = (restaurant: RestaurantItem) => {
+    recordUserInteraction();
+    setCartItems((prev) => [
+      ...prev,
+      { id: `${restaurant.id}-${Date.now()}`, name: restaurant.featuredItem, price: restaurant.price },
+    ]);
+    setAddedNoticeId(restaurant.id);
+    setTimeout(() => {
+      setAddedNoticeId((curr) => (curr === restaurant.id ? null : curr));
+    }, 1200);
+  };
+
+  const handleRemoveFromCart = (index: number) => {
+    recordUserInteraction();
+    setCartItems((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const cartTotal = cartItems.reduce((acc, item) => acc + item.price, 0);
+
+  const filteredRestaurants = BITECRAFT_RESTAURANTS.filter((r) => {
+    const matchesCategory = selectedCategory === "All" || r.category === selectedCategory;
+    const matchesSearch =
+      r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      r.featuredItem.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
+
+  const handleMoveKanbanTask = (taskId: string) => {
+    recordUserInteraction();
+    setKanbanTasks((prev) =>
+      prev.map((t) => {
+        if (t.id !== taskId) return t;
+        const nextStatus =
+          t.status === "todo" ? "in_progress" : t.status === "in_progress" ? "done" : "todo";
+        return { ...t, status: nextStatus };
+      })
+    );
+  };
+
+  const handleAddKanbanTask = () => {
+    recordUserInteraction();
+    const newTask: KanbanTask = {
+      id: `task-${Date.now()}`,
+      key: `FLOW-${Math.floor(120 + Math.random() * 20)}`,
+      title: "Automated Sandbox Build Telemetry",
+      tag: "Infra",
+      description: "Verify isolated Docker sandbox telemetry.",
+      status: "todo",
+      priority: "High",
+      dueDate: "Tomorrow",
+      assignee: { name: "Adarsh Kumar", initials: "AK" },
+    };
+    setKanbanTasks((prev) => [newTask, ...prev]);
+  };
+
+  const activeFileObject = activeFilesMap[activeFilePath] || activeFilesMap["src/App.jsx"];
+
+  const isFileOrFolderVisible = (node: TreeNode): boolean => {
+    if (
+      generationState === "BUILDING" ||
+      generationState === "READY" ||
+      generationState === "PREVIEW_VISIBLE"
+    ) {
+      return true;
+    }
+    if (!node.isFolder) {
+      return generatedFiles.includes(node.path);
+    }
+    return (node.children || []).some(isFileOrFolderVisible);
+  };
+
+  const renderMinimalTreeNode = (node: TreeNode, depth = 0): React.ReactNode => {
+    if (!isFileOrFolderVisible(node)) {
+      return null;
+    }
+    if (node.isFolder) {
+      const isOpen = expandedFolders[node.path] ?? true;
+      return (
+        <div key={node.path} className="select-none">
+          <button
+            type="button"
+            onClick={() => toggleFolder(node.path)}
+            style={{ paddingLeft: `${depth * 10 + 6}px` }}
+            className="w-full flex items-center gap-1.5 py-1 text-[11px] text-[#8b949e] hover:text-[#f0f6fc] hover:bg-[#1f242c]/70 rounded-md transition-colors text-left font-sans cursor-pointer group"
+          >
+            <ChevronRight
+              className={`w-3 h-3 text-[#6e7681] group-hover:text-[#c9d1d9] transition-transform duration-150 ${isOpen ? "rotate-90" : ""
+                }`}
+            />
+            {isOpen ? (
+              <FolderOpen className="w-3.5 h-3.5 text-[#79c0ff]" />
+            ) : (
+              <Folder className="w-3.5 h-3.5 text-[#79c0ff]" />
+            )}
+            <span className="truncate">{node.name}</span>
+          </button>
+          {isOpen && node.children && (
+            <div>{node.children.map((child) => renderMinimalTreeNode(child, depth + 1))}</div>
+          )}
+        </div>
+      );
+    }
+
+    const isActive = activeFilePath === node.path;
+    return (
+      <button
+        key={node.path}
+        type="button"
+        onClick={() => {
+          recordUserInteraction();
+          setActiveFilePath(node.path);
+          setIsFilesOpen(false);
+        }}
+        style={{ paddingLeft: `${depth * 10 + 20}px` }}
+        className={`w-full flex items-center justify-between py-1 px-2 text-[11px] font-mono rounded-md text-left transition-colors cursor-pointer truncate ${isActive
+          ? "bg-[#1f242c] text-[#79c0ff] font-medium"
+          : "text-[#c9d1d9] hover:bg-[#161b22] hover:text-white"
+          }`}
+      >
+        <div className="flex items-center gap-1.5 truncate">
+          <FileCode className={`w-3 h-3 ${isActive ? "text-[#79c0ff]" : "text-[#6e7681]"}`} />
+          <span className="truncate">{node.name}</span>
+        </div>
+        {isActive && <span className="w-1.5 h-1.5 rounded-full bg-[#79c0ff] shrink-0" />}
+      </button>
+    );
+  };
 
   return (
-    <div className="flex flex-col h-[385px] sm:h-[415px] md:h-[445px] w-full bg-white text-slate-800 select-none overflow-hidden font-sans border-t border-slate-200/90">
-      {/* Top Bar: Prompt status on right, view toggles on mobile */}
-      <div className="flex items-center justify-between px-2.5 sm:px-4 py-1.5 sm:py-2 bg-slate-50 border-b border-slate-200/80 text-[11px] shrink-0 gap-2">
-        <div className="flex items-center gap-1.5 sm:gap-2 truncate flex-1 min-w-0">
-          <div className="flex items-center justify-center w-4 h-4 rounded-md bg-blue-500/10 text-blue-600 shrink-0">
-            <Sparkles className="w-2.5 h-2.5" />
-          </div>
-          <span className="text-slate-500 font-mono hidden sm:inline text-[10.5px]">Prompt:</span>
-          <span className="text-slate-800 font-mono font-medium truncate text-[10.5px] sm:text-[11px]">
-            &quot;{typedPrompt || currentProject.prompt}&quot;
-          </span>
+    <div className="flex flex-col h-[450px] sm:h-[475px] md:h-[500px] w-full bg-white text-[#171717] select-none overflow-hidden font-sans border-t border-[#e5e5e5]">
+
+      <div className="flex lg:hidden h-8 px-3 bg-[#fafafa] border-b border-[#e5e5e5] items-center justify-between text-xs shrink-0">
+        <div className="flex items-center gap-1.5 text-[10px] font-medium text-[#737373]">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#171717]" />
+          <span>{appType === "bitecraft" ? "BiteCraft App" : "FlowBoard App"}</span>
         </div>
-
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          {/* Desktop/Tablet Phase badge */}
-          <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[10px] font-mono bg-white text-slate-700 border border-slate-200 shadow-2xs">
-            <span>
-              {phase === "ide_view" && "VS Code Workspace"}
-              {phase === "cursor_moving" && "Navigating to Terminal"}
-              {phase === "typing_mvn" && "Running ./mvnw spring-boot:run"}
-              {phase === "booting_spring" && "Spring Boot Initializing..."}
-              {phase === "prompt_typing" && "ChatGPT Prompt Composer"}
-              {phase === "prompt_moving_up" && "Sending Prompt Requirement..."}
-              {phase === "ai_generating" && "Spring AI Synthesizing AST..."}
-              {phase === "live_ready" && `Demo ${projectIndex + 1}/2 • Active`}
-            </span>
-          </span>
-
-          {/* Mobile view toggle */}
-          <div className="flex sm:hidden bg-slate-200/80 rounded-md p-0.5 border border-slate-200 text-[10.5px]">
-            <button
-              onClick={() => setMobileView("code")}
-              className={`px-2 py-0.5 rounded transition-all cursor-pointer ${mobileView === "code" ? "bg-white text-slate-900 font-semibold shadow-2xs" : "text-slate-600"
-                }`}
-            >
-              Code
-            </button>
-            <button
-              onClick={() => setMobileView("preview")}
-              className={`px-2 py-0.5 rounded transition-all cursor-pointer ${mobileView === "preview" ? "bg-white text-slate-900 font-semibold shadow-2xs" : "text-slate-600"
-                }`}
-            >
-              App
-            </button>
-          </div>
+        <div className="flex bg-[#f0f0f0] p-0.5 rounded-lg border border-[#e5e5e5] text-[10px] font-sans">
+          <button
+            onClick={() => setMobileTab("chat")}
+            className={`px-2.5 py-0.5 rounded-md transition-all cursor-pointer ${mobileTab === "chat" ? "bg-white text-[#171717] font-medium shadow-2xs" : "text-[#737373]"
+              }`}
+          >
+            Chat
+          </button>
+          <button
+            onClick={() => setMobileTab("preview")}
+            className={`px-2.5 py-0.5 rounded-md transition-all cursor-pointer ${mobileTab === "preview" ? "bg-white text-[#171717] font-medium shadow-2xs" : "text-[#737373]"
+              }`}
+          >
+            Preview
+          </button>
+          <button
+            onClick={() => setMobileTab("code")}
+            className={`px-2.5 py-0.5 rounded-md transition-all cursor-pointer ${mobileTab === "code" ? "bg-white text-[#171717] font-medium shadow-2xs" : "text-[#737373]"
+              }`}
+          >
+            Code
+          </button>
         </div>
       </div>
 
-      {/* Main Split Screen */}
-      <div className="flex-1 grid grid-cols-1 md:grid-cols-12 min-h-0 bg-white">
-        {/* ========================================================================= */}
-        {/* LEFT PANEL: Pixel-Perfect VS Code Workstation from Reference Screenshot    */}
-        {/* ========================================================================= */}
+      <div className="flex-1 flex min-h-0 bg-white">
+
         <div
-          className={`${mobileView === "code" ? "flex" : "hidden"
-            } md:flex md:col-span-6 flex-col border-r border-[#252526] bg-[#1e1e1e] text-slate-200 font-mono text-[11px] min-h-0 relative overflow-hidden`}
+          className={`${mobileTab === "chat" ? "flex" : "hidden"
+            } lg:flex lg:w-[23%] flex-col border-r border-[#e5e5e5] bg-[#fafafa] min-h-0 relative select-text`}
         >
-          {/* 1. IDE VIEW & MVN RUNNING STAGES (AUTHENTIC VS CODE WORKSTATION) */}
-          {(phase === "ide_view" ||
-            phase === "cursor_moving" ||
-            phase === "typing_mvn" ||
-            phase === "booting_spring") && (
-              <div className="flex flex-col h-full w-full bg-[#1e1e1e]">
-                {/* VS Code macOS Title Bar */}
-                <div className="flex items-center justify-between px-2.5 sm:px-3 bg-[#252526] border-b border-[#333333] text-[10px] text-slate-300 h-8 shrink-0 select-none">
-                  {/* Traffic lights */}
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f56]" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#27c93f]" />
-                  </div>
-
-                  {/* Center Search Pill */}
-                  <div className="flex items-center justify-center gap-1.5 px-3 py-0.5 rounded-md bg-[#2d2d2d] border border-[#3c3c3c] text-[10px] text-[#cccccc] font-sans shadow-xs w-44 sm:w-56 mx-auto">
-                    <Search className="w-2.5 h-2.5 text-[#858585] shrink-0" />
-                    <span className="truncate">code2live-engine</span>
-                  </div>
-
-                  {/* Right VS Code Window Controls */}
-                  <div className="flex items-center gap-1.5 shrink-0 text-[#858585]">
-                    <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor">
-                      <path d="M2 3a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H2zm6 9H2V4h6v8zm1 0V4h5v8H9z" />
-                    </svg>
-                    <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor">
-                      <path d="M14 2H2a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1zM2 13V4h12v9H2z" />
-                      <path d="M10 4h4v9h-4z" />
-                    </svg>
-                  </div>
-                </div>
-
-                {/* Workstation Body: Activity Bar + Explorer + (Editor & Terminal) */}
-                <div className="flex-1 flex min-h-0 bg-[#1e1e1e]">
-                  {/* 1. Activity Bar (Far Left) - Compact on mobile to maximize Editor & Terminal room */}
-                  <div className="w-7 sm:w-11 bg-[#333333] border-r border-[#252526] flex flex-col justify-between py-1.5 sm:py-2 shrink-0 select-none">
-                    <div className="flex flex-col gap-2.5 sm:gap-3">
-                      {/* File Explorer (Active, White border indicator) */}
-                      <div className="flex items-center justify-center relative border-l-2 border-white text-white py-0.5 sm:py-1">
-                        <svg className="w-3.5 h-3.5 sm:w-[18px] sm:h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                          <rect x="9" y="9" width="13" height="13" rx="2" />
-                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                        </svg>
-                      </div>
-                      {/* Search */}
-                      <div className="flex items-center justify-center text-[#858585] hover:text-[#cccccc] py-0.5">
-                        <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                      </div>
-                      {/* Source Control with Blue Badge 4 */}
-                      <div className="flex items-center justify-center relative py-0.5 sm:py-1 text-[#858585] hover:text-[#cccccc] cursor-default">
-                        <div className="relative">
-                          <GitBranch className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                          <span className="absolute -top-1 -right-1.5 min-w-[11px] h-[11px] sm:min-w-[13px] sm:h-[13px] px-0.5 rounded-full bg-[#007acc] text-white text-[6.5px] sm:text-[7.5px] font-bold flex items-center justify-center leading-none shadow-xs">
-                            4
-                          </span>
-                        </div>
-                      </div>
-                      {/* Run/Debug */}
-                      <div className="flex items-center justify-center text-[#858585] hover:text-[#cccccc] py-0.5">
-                        <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                          <polygon points="6 3 20 12 6 21 6 3" />
-                        </svg>
-                      </div>
-                      {/* Extensions */}
-                      <div className="flex items-center justify-center text-[#858585] hover:text-[#cccccc] py-0.5">
-                        <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                          <rect width="6" height="6" x="3" y="3" rx="1" />
-                          <rect width="6" height="6" x="14" y="3" rx="1" />
-                          <rect width="6" height="6" x="14" y="14" rx="1" />
-                          <rect width="6" height="6" x="3" y="14" rx="1" />
-                        </svg>
-                      </div>
-                    </div>
-
-                    {/* Settings Gear */}
-                    <div className="flex items-center justify-center text-[#858585] hover:text-[#cccccc] py-0.5 sm:py-1">
-                      <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                    </div>
-                  </div>
-
-                  {/* 2. Explorer Sidebar (Middle Left: Authentic Spring Boot Backend Tree, Slimmed on Mobile) */}
-                  <div className="w-20 sm:w-36 bg-[#252526] border-r border-[#1e1e1e] flex flex-col shrink-0 select-none overflow-hidden text-[8px] sm:text-[10px] font-sans py-1.5 sm:py-2">
-                    <div className="px-1.5 sm:px-2.5 pb-1 text-[7.5px] sm:text-[8.5px] font-bold text-[#cccccc] tracking-wider uppercase">
-                      EXPLORER
-                    </div>
-                    <div className="flex flex-col gap-0.5 text-[#cccccc]">
-                      {/* v src/main/java */}
-                      <div className="flex items-center gap-1 px-1.5 sm:px-2.5 py-0.5 hover:bg-[#2a2d2e] cursor-default text-amber-400">
-                        <ChevronDown className="w-2 h-2 sm:w-2.5 sm:h-2.5 shrink-0" />
-                        <span className="font-medium truncate">src/main/java</span>
-                      </div>
-
-                      {/* v com.code2live */}
-                      <div className="flex items-center gap-1 pl-2.5 sm:pl-4 pr-1 sm:pr-2 py-0.5 hover:bg-[#2a2d2e] cursor-default text-slate-300">
-                        <ChevronDown className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-slate-400 shrink-0" />
-                        <span className="truncate">com.code2live</span>
-                      </div>
-
-                      {/* Code2LiveApplication.java (ACTIVE ROW WITH BLUE ACCENT) */}
-                      <div className="flex items-center gap-1.5 pl-3 sm:pl-6 pr-1 sm:pr-2 py-0.5 bg-[#37373d] text-white border-l-2 border-[#007acc] font-medium cursor-default truncate">
-                        <Image
-                          src="/icons/Java.svg"
-                          alt="Java"
-                          width={14}
-                          height={14}
-                          className="w-3 h-3 sm:w-3.5 sm:h-3.5 object-contain shrink-0"
-                        />
-                        <span className="truncate text-blue-200">Code2LiveApp.java</span>
-                      </div>
-
-                      {/* KafkaPipelineEngine.java */}
-                      <div className="flex items-center gap-1.5 pl-3 sm:pl-6 pr-1 sm:pr-2 py-0.5 hover:bg-[#2a2d2e] cursor-default truncate text-slate-400">
-                        <Image
-                          src="/icons/Java.svg"
-                          alt="Java"
-                          width={14}
-                          height={14}
-                          className="w-3 h-3 sm:w-3.5 sm:h-3.5 object-contain shrink-0"
-                        />
-                        <span className="truncate">KafkaPipeline.java</span>
-                      </div>
-
-                      {/* RedisStateCache.java */}
-                      <div className="flex items-center gap-1.5 pl-3 sm:pl-6 pr-1 sm:pr-2 py-0.5 hover:bg-[#2a2d2e] cursor-default truncate text-slate-400">
-                        <Image
-                          src="/icons/Java.svg"
-                          alt="Java"
-                          width={14}
-                          height={14}
-                          className="w-3 h-3 sm:w-3.5 sm:h-3.5 object-contain shrink-0"
-                        />
-                        <span className="truncate">RedisStateCache.java</span>
-                      </div>
-
-                      {/* DockerSandboxService.java */}
-                      <div className="flex items-center gap-1.5 pl-3 sm:pl-6 pr-1 sm:pr-2 py-0.5 hover:bg-[#2a2d2e] cursor-default truncate text-slate-400">
-                        <Image
-                          src="/icons/Docker.svg"
-                          alt="Docker"
-                          width={14}
-                          height={14}
-                          className="w-3 h-3 sm:w-3.5 sm:h-3.5 object-contain shrink-0"
-                        />
-                        <span className="truncate">DockerSandbox.java</span>
-                      </div>
-
-                      {/* WebSocketSessionManager.java */}
-                      <div className="flex items-center gap-1.5 pl-3 sm:pl-6 pr-1 sm:pr-2 py-0.5 hover:bg-[#2a2d2e] cursor-default truncate text-slate-400">
-                        <Image
-                          src="/icons/Java.svg"
-                          alt="Java"
-                          width={14}
-                          height={14}
-                          className="w-3 h-3 sm:w-3.5 sm:h-3.5 object-contain shrink-0"
-                        />
-                        <span className="truncate">WebSocketSession.java</span>
-                      </div>
-
-                      {/* SpringAiPromptController.java */}
-                      <div className="flex items-center gap-1.5 pl-3 sm:pl-6 pr-1 sm:pr-2 py-0.5 hover:bg-[#2a2d2e] cursor-default truncate text-slate-400">
-                        <Image
-                          src="/icons/Java.svg"
-                          alt="Java"
-                          width={14}
-                          height={14}
-                          className="w-3 h-3 sm:w-3.5 sm:h-3.5 object-contain shrink-0"
-                        />
-                        <span className="truncate">SpringAiPrompt.java</span>
-                      </div>
-
-                      {/* v resources */}
-                      <div className="flex items-center gap-1 px-1.5 sm:px-2.5 py-0.5 hover:bg-[#2a2d2e] cursor-default mt-0.5 text-slate-400">
-                        <ChevronDown className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-slate-500 shrink-0" />
-                        <span className="truncate">resources</span>
-                      </div>
-
-                      {/* application.yml */}
-                      <div className="flex items-center gap-1 pl-2.5 sm:pl-5 pr-1 sm:pr-2 py-0.5 hover:bg-[#2a2d2e] cursor-default truncate text-slate-400">
-                        <span className="px-0.5 rounded text-[6.5px] sm:text-[7px] font-bold bg-amber-600/80 text-white leading-none">YML</span>
-                        <span className="truncate">application.yml</span>
-                      </div>
-
-                      {/* Dockerfile */}
-                      <div className="flex items-center gap-1 px-1.5 sm:px-2.5 py-0.5 hover:bg-[#2a2d2e] cursor-default truncate text-slate-400 mt-0.5">
-                        <Image
-                          src="/icons/Docker.svg"
-                          alt="Docker"
-                          width={12}
-                          height={12}
-                          className="w-2.5 h-2.5 sm:w-3 sm:h-3 object-contain shrink-0"
-                        />
-                        <span className="truncate">Dockerfile</span>
-                      </div>
-
-                      {/* pom.xml */}
-                      <div className="flex items-center gap-1 px-1.5 sm:px-2.5 py-0.5 hover:bg-[#2a2d2e] cursor-default truncate text-slate-400 mt-0.5">
-                        <span className="px-0.5 rounded text-[6.5px] sm:text-[7px] font-bold bg-blue-600 text-white leading-none">XML</span>
-                        <span className="truncate">pom.xml</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 3. Right Column: Editor + Terminal Drawer */}
-                  <div className="flex-1 flex flex-col min-h-0 bg-[#1e1e1e] relative overflow-hidden">
-
-                    {/* Top: Editor Pane (Spring Boot Java Source Code) */}
-                    <div className="h-[38%] flex flex-col min-h-0 border-b border-[#333333]">
-                      {/* Tab: Code2LiveApplication.java */}
-                      <div className="h-7 bg-[#252526] border-b border-[#1e1e1e] flex items-center px-1 shrink-0">
-                        <div className="flex items-center gap-1.5 px-3 py-1 bg-[#1e1e1e] border-t-2 border-[#007acc] text-[#ffffff] text-[9px] sm:text-[9.5px] font-sans">
-                          <Image
-                            src="/icons/Java.svg"
-                            alt="Java"
-                            width={14}
-                            height={14}
-                            className="w-3.5 h-3.5 object-contain shrink-0"
-                          />
-                          <span>Code2LiveApplication.java</span>
-                        </div>
-                      </div>
-
-                      {/* Spring Boot Java Syntax-Highlighted Code */}
-                      <div className="p-2 sm:p-2.5 font-mono text-[9px] sm:text-[10px] leading-[1.6] select-none text-slate-300 overflow-hidden flex-1">
-                        <div className="text-slate-500 italic">&#47;&#47; Spring Boot Multi-Agent Autonomous Engine</div>
-                        <div>
-                          <span className="text-[#c586c0]">package </span>
-                          <span className="text-[#cccccc]">com.code2live.engine;</span>
-                        </div>
-                        <div className="h-0.5" />
-                        <div>
-                          <span className="text-[#4ec9b0] font-semibold">@SpringBootApplication</span>
-                        </div>
-                        <div>
-                          <span className="text-[#4ec9b0] font-semibold">@EnableKafka</span>
-                        </div>
-                        <div>
-                          <span className="text-[#c586c0]">public class </span>
-                          <span className="text-[#4fc1ff] font-bold">Code2LiveApplication </span>
-                          <span className="text-[#ffd700]">&#123;</span>
-                        </div>
-                        <div className="pl-3 truncate">
-                          <span className="text-[#c586c0]">public static void </span>
-                          <span className="text-[#dcdcaa]">main</span>
-                          <span className="text-[#ffd700]">(</span>
-                          <span className="text-[#4fc1ff]">String</span>
-                          <span className="text-[#cccccc]">[] args</span>
-                          <span className="text-[#ffd700]">) &#123;</span>
-                        </div>
-                        <div className="pl-6 truncate">
-                          <span className="text-[#4fc1ff]">SpringApplication</span>
-                          <span className="text-[#cccccc]">.</span>
-                          <span className="text-[#dcdcaa]">run</span>
-                          <span className="text-[#cccccc]">(Code2LiveApplication.</span>
-                          <span className="text-[#c586c0]">class</span>
-                          <span className="text-[#cccccc]">, args);</span>
-                        </div>
-                        <div className="pl-3"><span className="text-[#ffd700]">&#125;</span></div>
-                        <div><span className="text-[#ffd700]">&#125;</span></div>
-                      </div>
-                    </div>
-
-                    {/* Bottom: Terminal Drawer */}
-                    <div className="h-[62%] flex flex-col min-h-0 bg-[#1e1e1e]">
-                      {/* Terminal Tabs Row (Active tab TERMINAL with blue underline indicator) */}
-                      <div className="flex items-center gap-2 sm:gap-4 px-2 sm:px-3 py-1 bg-[#1e1e1e] border-b border-[#252526] text-[8.5px] sm:text-[9.5px] font-sans tracking-wider uppercase text-[#858585] shrink-0 select-none">
-                        <span>PROBLEMS</span>
-                        <span>OUTPUT</span>
-                        <span>CONSOLE</span>
-                        <span className="text-white font-semibold border-b-2 border-blue-500 pb-0.5 relative shrink-0">
-                          TERMINAL
-
-                          {/* Virtual Mouse Cursor: Glides gracefully down directly onto the TERMINAL tab! */}
-                          <AnimatePresence>
-                            {(phase === "ide_view" || phase === "cursor_moving") && (
-                              <motion.div
-                                initial={{ x: -35, y: -65, opacity: 0 }}
-                                animate={
-                                  phase === "cursor_moving"
-                                    ? { x: 8, y: 10, opacity: 1, scale: [1, 1, 0.88, 1] }
-                                    : { x: -35, y: -65, opacity: 0.9, scale: 1 }
-                                }
-                                exit={{ opacity: 0 }}
-                                transition={
-                                  phase === "cursor_moving"
-                                    ? { duration: 0.95, ease: [0.16, 1, 0.3, 1] }
-                                    : { duration: 0.4 }
-                                }
-                                className="absolute z-50 pointer-events-none drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]"
-                              >
-                                <div className="relative">
-                                  <svg
-                                    className="w-4.5 h-4.5 text-white fill-white stroke-slate-900 stroke-[1.5]"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path d="M3 3l7 18 3-7 7-3L3 3z" />
-                                  </svg>
-                                  <span className="absolute left-4.5 -top-1 px-1.5 py-0.5 rounded-md bg-blue-600 text-white font-mono text-[8px] font-semibold shadow-md border border-blue-400/30 whitespace-nowrap">
-                                    Execute ./mvnw
-                                  </span>
-                                </div>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </span>
-                        <span className="hidden sm:inline">PORTS</span>
-                      </div>
-
-                      {/* Terminal Body */}
-                      <div className="flex-1 px-2 sm:px-2.5 py-1.5 overflow-y-auto text-[9px] sm:text-[10px] font-mono leading-relaxed space-y-1 bg-[#1e1e1e]">
-                        {/* Command Prompt: Guaranteed Single Clean Line with no word breaking */}
-                        <div className="flex items-center gap-1.5 text-[9px] sm:text-[9.5px] font-mono whitespace-nowrap overflow-x-auto scrollbar-none text-slate-300 py-0.5">
-                          <span className="text-[#519aba] font-medium shrink-0">adarsh@mac:~/code2live</span>
-                          <span className="text-emerald-400 font-bold shrink-0">$</span>
-                          <span className="text-white font-medium shrink-0">
-                            {typedCommand}
-                            {(phase === "ide_view" ||
-                              phase === "cursor_moving" ||
-                              phase === "typing_mvn") && (
-                                <span className="inline-block w-1.5 h-3 ml-0.5 bg-white align-middle animate-pulse" />
-                              )}
-                          </span>
-                        </div>
-
-                        {/* Spring Boot Booting Logs, Logo & Crisp ASCII Banner */}
-                        {phase === "booting_spring" && (
-                          <motion.div
-                            initial={{ opacity: 0, y: 4 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.35 }}
-                            className="space-y-1 mt-0.5 font-mono select-none overflow-x-auto scrollbar-none"
-                          >
-                            {/* Official Spring Boot Hexagon Logo from project assets + Version Header */}
-                            <div className="flex items-center gap-2 pb-1 border-b border-emerald-900/40">
-                              <div className="w-5 h-5 rounded-md bg-[#252526] border border-emerald-500/30 flex items-center justify-center shrink-0 shadow-2xs overflow-hidden">
-                                <Image
-                                  src="/icons/SpringBoot.png"
-                                  width={16}
-                                  height={16}
-                                  alt="Spring Boot"
-                                  className="rounded-xs shrink-0"
-                                />
-                              </div>
-                              <div className="flex items-center gap-1.5 text-[9px] font-sans">
-                                <span className="font-bold text-white tracking-wide">Spring Boot</span>
-                                <span className="text-emerald-400 font-mono text-[8.5px] px-1 py-0.2 rounded bg-emerald-500/10 border border-emerald-500/20 font-medium">v3.3.4</span>
-                                <span className="text-slate-400 text-[8px] font-mono">• OpenJDK 21 LTS</span>
-                              </div>
-                            </div>
-
-                            {/* Crisp ASCII Art Banner (Pure pre tag with monospace tracking-normal) */}
-                            <div className="overflow-x-auto scrollbar-none py-0.5">
-                              <pre
-                                className="spring-ascii-art font-mono text-[6.5px] sm:text-[7.5px] leading-[1.18] text-[#6db33f] font-normal tracking-normal select-none m-0 p-0 whitespace-pre"
-                                style={{
-                                  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
-                                  fontVariantLigatures: 'none',
-                                  fontFeatureSettings: '"liga" 0, "calt" 0',
-                                  letterSpacing: '0px',
-                                }}
-                              >
-                                {SPRING_BANNER.join("\n")}
-                              </pre>
-                            </div>
-
-                            {/* Boot Logs */}
-                            <div className="pt-0.5 space-y-0.5 text-[8px] sm:text-[8.5px]">
-                              {BOOT_LOGS.map((log, i) => (
-                                <div
-                                  key={i}
-                                  className={`truncate ${log.startsWith("✓")
-                                    ? "text-emerald-300 font-semibold"
-                                    : "text-slate-400"
-                                    }`}
-                                >
-                                  {log}
-                                </div>
-                              ))}
-                            </div>
-                          </motion.div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+          <div className="px-3 py-2 border-b border-[#e5e5e5] bg-white flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded-md bg-[#171717] text-white flex items-center justify-center text-[10px] font-bold shadow-2xs">
+                AI
+              </div>
+              <div>
+                <div className="text-xs font-semibold text-[#171717]">Code2Live Agent</div>
+                <div className="text-[10px] text-[#737373] font-sans">
+                  {appType === "bitecraft" ? "Consumer E-Commerce" : "Project Management"}
                 </div>
               </div>
-            )}
+            </div>
 
-          {/* 2. CHATGPT CONTINUOUS CONVERSATION STREAM (PROMPT -> SCROLL UP -> CODE STREAMING) */}
-          {(phase === "prompt_typing" ||
-            phase === "prompt_moving_up" ||
-            phase === "ai_generating" ||
-            phase === "live_ready") && (
-              <div className="flex flex-col h-full w-full p-3 sm:p-3.5 bg-[#1e1e1e] justify-between overflow-hidden">
-                {/* ChatGPT Conversation Header */}
-                <div className="flex items-center justify-between pb-2.5 border-b border-[#2d2d2d] shrink-0">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-lg bg-[#252526] border border-[#333333] flex items-center justify-center shrink-0 shadow-xs">
-                      <Image src="/icons/AI.svg" width={15} height={15} alt="AI" className="w-3.5 h-3.5" />
-                    </div>
-                    <div>
-                      <div className="text-xs font-semibold text-white">Code2Live</div>
-                      <div className="text-[9.5px] text-[#858585] font-mono">GPT-4o • Spring AI AST Engine</div>
-                    </div>
-                  </div>
-
-                  {/* Clean, Professional Status Typography (No glowing dot, no rounded box) */}
-                  <div className="text-[10px] sm:text-[11px] font-mono text-slate-400 select-none">
-                    <span className="text-slate-400 font-medium">
-                      {phase === "prompt_typing" && "Requirement Input"}
-                      {phase === "prompt_moving_up" && "Pipeline Triggered"}
-                      {phase === "ai_generating" && "Streaming AST"}
-                      {phase === "live_ready" && "Ready"}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Scrollable Conversation Stream (Auto-scrolls down like ChatGPT as code is written) */}
-                <div
-                  ref={chatScrollRef}
-                  className="flex-1 py-2.5 overflow-y-auto space-y-3 min-h-0 scrollbar-thin scrollbar-thumb-[#333333] scrollbar-track-transparent"
-                >
-                  {/* Initial ChatGPT greeting when typing prompt */}
-                  {phase === "prompt_typing" && (
-                    <div className="flex-1 h-full flex flex-col items-center justify-center text-center p-4 select-none opacity-90">
-                      <div className="w-10 h-10 rounded-xl bg-[#252526] border border-[#333333] flex items-center justify-center mb-2 shadow-sm">
-                        <Image src="/icons/AI.svg" width={22} height={22} alt="AI" className="w-5 h-5" />
-                      </div>
-                      <div className="text-xs font-semibold text-white tracking-tight">Code2Live Spring AI Engine</div>
-                      <div className="text-[10px] text-[#858585] mt-1 max-w-[240px] leading-relaxed">
-                        Type requirements below to synthesize full-stack Spring Boot architecture
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Message 1: User Prompt Bubble (Slides smoothly UP from input bar into feed) */}
-                  {(phase === "prompt_moving_up" || phase === "ai_generating" || phase === "live_ready") && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 35, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-                      className="flex items-start gap-2.5"
-                    >
-                      <div className="w-5 h-5 rounded-md bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0 mt-0.5">
-                        <User className="w-3 h-3" />
-                      </div>
-                      <div className="p-2.5 sm:p-3 rounded-xl bg-[#252526] border border-[#333333] text-slate-200 text-[11px] leading-relaxed shadow-md max-w-[95%]">
-                        <span className="text-[#858585] font-mono text-[9px] block mb-1">PROMPT REQUIREMENT</span>
-                        <span>{typedPrompt || currentProject.prompt}</span>
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {/* Message 2: AI Assistant Response with Embedded Code Block */}
-                  {(phase === "ai_generating" || phase === "live_ready") && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 15 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.35 }}
-                      className="flex items-start gap-2.5"
-                    >
-                      <div className="w-5 h-5 rounded-md bg-[#252526] border border-[#333333] flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
-                        <Image src="/icons/AI.svg" width={14} height={14} alt="AI" className="w-3 h-3" />
-                      </div>
-                      <div className="flex-1 flex flex-col gap-2 min-w-0">
-                        <div className="text-[10px] sm:text-[10.5px] text-[#cccccc] leading-relaxed">
-                          Synthesizing full-stack Spring Boot architecture with Kafka pipeline &amp; WebSocket session:
-                        </div>
-
-                        {/* Embedded ChatGPT Code Block */}
-                        <div className="rounded-xl overflow-hidden border border-[#333333] bg-[#1e1e1e] shadow-md">
-                          {/* Code Header Bar */}
-                          <div className="flex items-center justify-between px-3 py-1.5 bg-[#252526] border-b border-[#333333] text-[10px] text-slate-400 font-mono">
-                            <div className="flex items-center gap-1.5 truncate">
-                              <Image
-                                src="/icons/Java.svg"
-                                alt="Java"
-                                width={14}
-                                height={14}
-                                className="w-3.5 h-3.5 object-contain shrink-0"
-                              />
-                              <span className="text-slate-200 font-medium truncate">{currentProject.mainFile}</span>
-                            </div>
-                            <div className="flex items-center gap-2 shrink-0">
-                              <span className="text-[#858585] text-[9px]">Java • Spring Boot</span>
-                              <span className="text-[#cccccc] text-[9px] px-1.5 py-0.5 rounded bg-[#2d2d2d] border border-[#3c3c3c] cursor-default">
-                                Copy code
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Streaming Code Lines */}
-                          <div className="p-2.5 max-h-[160px] sm:max-h-[180px] overflow-y-auto space-y-1 font-mono text-[10px] sm:text-[10.5px] leading-relaxed scrollbar-thin scrollbar-thumb-[#333333] scrollbar-track-transparent">
-                            {currentProject.codeLines.slice(0, streamIndex).map((line) => (
-                              <div key={line.num} className="flex gap-2.5 items-center">
-                                <span className="w-4 text-right text-slate-500 select-none text-[9.5px] shrink-0">
-                                  {line.num}
-                                </span>
-                                <div className="flex-1 truncate">
-                                  {line.tokens.map((tok, i) => (
-                                    <span key={i} className={tok.color}>
-                                      {tok.text}
-                                    </span>
-                                  ))}
-                                  {line.num === streamIndex && streamIndex < currentProject.codeLines.length && (
-                                    <span className="inline-block w-1.5 h-3 ml-1 bg-blue-400 align-middle animate-pulse" />
-                                  )}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-
-                          {/* Code Block Footer: Clean Build Telemetry (No AI-style green pill box) */}
-                          <div className="flex items-center justify-between px-3 py-1.5 bg-[#252526] border-t border-[#333333] text-[9.5px] text-[#858585] font-mono select-none">
-                            <span className="flex items-center gap-1.5 text-slate-400">
-                              <Terminal className="w-3 h-3 text-slate-500" />
-                              <span>Topic: {currentProject.topic}</span>
-                            </span>
-                            {streamIndex >= currentProject.codeLines.length && (
-                              <span className="text-slate-400 font-mono text-[9px] sm:text-[9.5px]">
-                                Compiled in 0.82s
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </div>
-
-                {/* Bottom Chat Input Bar */}
-                <div
-                  className={`p-2 rounded-xl bg-[#252526] border transition-all duration-300 flex items-center justify-between shrink-0 ${phase === "prompt_typing"
-                    ? "border-blue-500/60 shadow-[0_0_15px_rgba(59,130,246,0.15)] ring-1 ring-blue-500/30"
-                    : "border-[#333333]"
-                    }`}
-                >
-                  <div className="flex items-center gap-2 flex-1 min-w-0 pl-1.5 pr-2">
-                    {phase === "prompt_typing" ? (
-                      <div className="flex items-center truncate text-[10.5px] text-white font-sans">
-                        <span className="truncate">{typedPrompt}</span>
-                        <span className="inline-block w-1.5 h-3.5 ml-0.5 bg-blue-400 align-middle animate-pulse shrink-0" />
-                      </div>
-                    ) : phase === "prompt_moving_up" ? (
-                      <span className="text-[#858585] text-[10px] italic">Sending prompt to engine...</span>
-                    ) : (
-                      <span className="text-[#858585] text-[10px] truncate">
-                        Ask Code2Live to generate microservices or full-stack apps...
-                      </span>
-                    )}
-                  </div>
-                  <div
-                    className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all duration-300 ${phase === "prompt_typing"
-                      ? "bg-blue-600 text-white shadow-md scale-105"
-                      : phase === "prompt_moving_up"
-                        ? "bg-blue-500 text-white scale-95"
-                        : "bg-[#2d2d2d] text-[#858585] border border-[#3c3c3c]"
-                      }`}
-                  >
-                    <Send className="w-3 h-3" />
-                  </div>
-                </div>
-              </div>
-            )}
-        </div>
-
-        {/* ========================================================= */}
-        {/* RIGHT PANEL: Live App Sandbox (Pure White / Light Theme)   */}
-        {/* ========================================================= */}
-        <div
-          className={`${mobileView === "preview" ? "flex" : "hidden"
-            } md:flex md:col-span-6 flex-col bg-[#F8FAFC] p-3 text-slate-800 justify-between min-h-0`}
-        >
-          {/* Sandbox Header */}
-          <div className="flex items-center justify-between pb-2 border-b border-slate-200/80 shrink-0 gap-2">
-            <span className="text-xs font-semibold tracking-tight text-slate-900 truncate">
-              <span className="hidden sm:inline">Live Application </span>Preview
-            </span>
-
-            {/* View Switcher Tabs */}
-            <div className="flex gap-1 bg-slate-200/70 p-0.5 rounded-lg border border-slate-200 text-[10px] shrink-0">
+            <div className="flex items-center bg-[#f0f0f0] p-0.5 rounded-lg border border-[#e5e5e5] text-[9.5px]">
               <button
                 type="button"
-                onClick={() => setActiveTab("app")}
-                className={`px-2 sm:px-2.5 py-0.5 rounded-md transition-all cursor-pointer ${activeTab === "app"
-                  ? "bg-white text-slate-900 font-semibold shadow-2xs"
-                  : "text-slate-600 hover:text-slate-900"
+                onClick={() => startLifecycle("bitecraft")}
+                className={`px-1.5 py-0.5 rounded-md transition-colors ${appType === "bitecraft" ? "bg-white text-[#171717] font-semibold shadow-2xs" : "text-[#737373]"
                   }`}
+                title="Switch to Food Delivery App"
               >
-                <span className="hidden sm:inline">App </span>Preview
+                Food
               </button>
               <button
                 type="button"
-                onClick={() => setActiveTab("telemetry")}
-                className={`px-2 sm:px-2.5 py-0.5 rounded-md transition-all cursor-pointer ${activeTab === "telemetry"
-                  ? "bg-white text-slate-900 font-semibold shadow-2xs"
-                  : "text-slate-600 hover:text-slate-900"
+                onClick={() => startLifecycle("flowboard")}
+                className={`px-1.5 py-0.5 rounded-md transition-colors ${appType === "flowboard" ? "bg-white text-[#171717] font-semibold shadow-2xs" : "text-[#737373]"
                   }`}
+                title="Switch to FlowBoard Kanban App"
               >
-                Telemetry
+                Kanban
               </button>
             </div>
           </div>
 
-          {/* Sandbox Content Area */}
-          <div className="flex-1 py-2 flex flex-col justify-center min-h-0 overflow-y-auto">
-            <AnimatePresence mode="wait">
-              {activeTab === "app" ? (
-                phase === "ide_view" ||
-                  phase === "cursor_moving" ||
-                  phase === "typing_mvn" ||
-                  phase === "booting_spring" ||
-                  phase === "prompt_typing" ||
-                  phase === "prompt_moving_up" ? (
-                  <motion.div
-                    key="pre-generation-standby"
-                    initial={{ opacity: 0, scale: 0.98 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.98 }}
-                    transition={{ duration: 0.25 }}
-                    className="flex-1 rounded-xl bg-white border border-slate-200/90 shadow-2xs p-3.5 flex flex-col justify-between relative overflow-hidden"
-                  >
-                    {/* Background blueprint decorative subtle grid */}
-                    <div className="absolute inset-0 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:16px_16px] opacity-40 pointer-events-none" />
+          <div className="flex-1 p-3 overflow-y-auto space-y-2.5 min-h-0 text-xs">
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-start gap-2"
+            >
+              <div className="w-5 h-5 rounded-full overflow-hidden border border-[#e5e5e5] shrink-0 mt-0.5 relative shadow-2xs bg-neutral-100">
+                <Image
+                  src="/images/avatar.png"
+                  alt="Adarsh Kumar"
+                  width={40}
+                  height={40}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="flex-1 p-2.5 rounded-xl bg-white border border-[#e5e5e5] text-[#171717] text-[11px] leading-relaxed shadow-2xs">
+                <span className="text-[9px] font-sans font-semibold text-[#a3a3a3] block mb-0.5 uppercase tracking-wider">
+                  Requirement
+                </span>
+                <span>{typedUserPrompt || "..."}</span>
+                {generationState === "PROMPT_SUBMITTED" && (
+                  <span className="inline-block w-1.5 h-3 ml-1 bg-[#171717] align-middle animate-pulse" />
+                )}
+              </div>
+            </motion.div>
 
-                    {/* Standby Header Strip */}
-                    <div className="flex items-center justify-between border-b border-slate-100 pb-2 relative z-10">
-                      <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-md bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold text-xs shrink-0">
-                          <Radio className="w-3.5 h-3.5 animate-pulse" />
-                        </div>
-                        <div>
-                          <div className="text-xs font-semibold text-slate-900">Sandbox Environment</div>
-                          <div className="text-[9.5px] text-slate-400 font-mono">Live Web Preview Engine</div>
-                        </div>
-                      </div>
-                      <div className="text-[10px] font-mono text-slate-500 flex items-center gap-1.5 select-none">
-                        <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-                        <span>
-                          {phase === "ide_view" && "System Standby"}
-                          {phase === "cursor_moving" && "Terminal Routing"}
-                          {phase === "typing_mvn" && "Maven Executing"}
-                          {phase === "booting_spring" && "Booting OpenJDK 21"}
-                          {phase === "prompt_typing" && "Awaiting Requirement"}
-                          {phase === "prompt_moving_up" && "Triggering Pipeline"}
-                        </span>
-                      </div>
+            {generationState !== "IDLE" && generationState !== "PROMPT_SUBMITTED" && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="flex items-start gap-2"
+              >
+                <div className="w-5 h-5 rounded-md bg-[#18181b] border border-[#27272a] flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
+                  <svg
+                    width="11"
+                    height="11"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="shrink-0"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M8 1.5L14 4.8V11.2L8 14.5L2 11.2V4.8L8 1.5Z"
+                      stroke="#3f3f46"
+                      strokeWidth="1.2"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M8 1.5V8M8 8L14 11.2M8 8L2 11.2"
+                      stroke="#3b82f6"
+                      strokeWidth="1.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <circle cx="8" cy="8" r="1.6" fill="#60a5fa" />
+                  </svg>
+                </div>
+                <div className="flex-1 p-2.5 rounded-xl bg-white border border-[#e5e5e5] text-[#171717] text-[11px] leading-relaxed shadow-2xs">
+                  <span className="text-[9px] font-sans font-semibold text-[#a3a3a3] block mb-0.5 uppercase tracking-wider">
+                    Code2Live AI
+                  </span>
+                  <span>{typedAiResponse || "Understanding requirements..."}</span>
+
+                  <div className="mt-2.5 pt-2 border-t border-[#f0f0f0] space-y-1.5 font-sans text-[10px]">
+                    <div
+                      className={`flex items-center gap-1.5 ${generationState === "ANALYZING"
+                        ? "text-[#171717] font-medium"
+                        : "text-[#52525b]"
+                        }`}
+                    >
+                      {generationState === "ANALYZING" ? (
+                        <div className="w-2.5 h-2.5 border-1.5 border-[#171717] border-t-transparent rounded-full animate-spin shrink-0" />
+                      ) : (
+                        <Check className="w-3 h-3 text-[#171717] stroke-[2.5] shrink-0" />
+                      )}
+                      <span>Understanding your requirements...</span>
                     </div>
 
-                    {/* Center Ambient Orchestration Animation */}
-                    <div className="flex-1 flex flex-col items-center justify-center py-4 text-center relative z-10">
-                      {/* Ambient Radial Gradient Halo */}
-                      <div className="absolute w-44 h-44 rounded-full bg-gradient-to-tr from-blue-500/10 via-emerald-500/10 to-indigo-500/10 blur-2xl pointer-events-none" />
+                    <div
+                      className={`flex items-center gap-1.5 ${generationState === "GENERATING_CODE"
+                        ? "text-[#171717] font-medium"
+                        : generationState === "BUILDING" ||
+                          generationState === "READY" ||
+                          generationState === "PREVIEW_VISIBLE"
+                          ? "text-[#52525b]"
+                          : "text-[#a3a3a3]"
+                        }`}
+                    >
+                      {generationState === "GENERATING_CODE" ? (
+                        <div className="w-2.5 h-2.5 border-1.5 border-[#171717] border-t-transparent rounded-full animate-spin shrink-0" />
+                      ) : generationState === "BUILDING" ||
+                        generationState === "READY" ||
+                        generationState === "PREVIEW_VISIBLE" ? (
+                        <Check className="w-3 h-3 text-[#171717] stroke-[2.5] shrink-0" />
+                      ) : (
+                        <div className="w-3 h-3 rounded-full border border-[#d4d4d8] shrink-0" />
+                      )}
+                      <span>
+                        {generationState === "GENERATING_CODE" && currentGeneratingFile
+                          ? `Creating ${currentGeneratingFile.split("/").pop()}...`
+                          : "Creating your application components..."}
+                      </span>
+                    </div>
 
-                      {/* Center Icon Orb */}
-                      <div className="relative mb-3.5">
-                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-b from-slate-50 to-slate-100/90 border border-slate-200/90 shadow-sm flex items-center justify-center">
-                          {phase === "booting_spring" ? (
-                            <Cpu className="w-6 h-6 text-emerald-600 animate-spin" style={{ animationDuration: "5s" }} />
-                          ) : phase === "prompt_typing" || phase === "prompt_moving_up" ? (
-                            <Sparkles className="w-6 h-6 text-blue-600 animate-pulse" />
-                          ) : (
-                            <Activity className="w-6 h-6 text-slate-500" />
-                          )}
-                        </div>
-                      </div>
+                    <div
+                      className={`flex items-center gap-1.5 ${generationState === "BUILDING"
+                        ? "text-[#171717] font-medium"
+                        : generationState === "READY" ||
+                          generationState === "PREVIEW_VISIBLE"
+                          ? "text-[#52525b]"
+                          : "text-[#a3a3a3]"
+                        }`}
+                    >
+                      {generationState === "BUILDING" ? (
+                        <div className="w-2.5 h-2.5 border-1.5 border-[#171717] border-t-transparent rounded-full animate-spin shrink-0" />
+                      ) : generationState === "READY" ||
+                        generationState === "PREVIEW_VISIBLE" ? (
+                        <Check className="w-3 h-3 text-[#171717] stroke-[2.5] shrink-0" />
+                      ) : (
+                        <div className="w-3 h-3 rounded-full border border-[#d4d4d8] shrink-0" />
+                      )}
+                      <span>Putting everything together...</span>
+                    </div>
 
-                      {/* Status Headlines */}
-                      <div className="text-xs font-semibold text-slate-900 tracking-tight">
-                        {phase === "prompt_typing" || phase === "prompt_moving_up"
-                          ? "Awaiting Natural Language Requirement"
-                          : phase === "booting_spring"
-                            ? "Spinning Up Spring Boot Multi-Agent Pipeline"
-                            : "Workstation Standby • Ready to Build"}
-                      </div>
-                      <div className="text-[10.5px] text-slate-500 font-sans max-w-[280px] mt-1 leading-relaxed">
-                        {phase === "prompt_typing"
-                          ? "Submit architectural prompt to stream full-stack Spring Boot code and hot-reload live preview."
-                          : phase === "booting_spring"
-                            ? "Connecting to Apache Kafka broker topic codegen.req and initializing OpenJDK 21 LTS."
-                            : "Execute ./mvnw spring-boot:run to activate multi-agent autonomous engineering pipeline."}
-                      </div>
+                    <div
+                      className={`flex items-center gap-1.5 ${generationState === "READY" ||
+                        generationState === "PREVIEW_VISIBLE"
+                        ? "text-[#171717] font-medium"
+                        : "text-[#a3a3a3]"
+                        }`}
+                    >
+                      {generationState === "READY" ||
+                        generationState === "PREVIEW_VISIBLE" ? (
+                        <Check className="w-3 h-3 text-[#171717] stroke-[2.5] shrink-0" />
+                      ) : (
+                        <div className="w-3 h-3 rounded-full border border-[#d4d4d8] shrink-0" />
+                      )}
+                      <span>Your application is ready.</span>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </div>
 
-                      {/* Animated Subtle Progress Bar for Prompting/Booting */}
-                      <div className="w-48 h-1.5 bg-slate-100 rounded-full mt-3 overflow-hidden border border-slate-200/60">
-                        <motion.div
-                          className="h-full bg-gradient-to-r from-blue-500 to-emerald-500 rounded-full"
-                          initial={{ width: "20%" }}
-                          animate={
-                            phase === "prompt_typing"
-                              ? { width: "70%" }
-                              : phase === "prompt_moving_up"
-                                ? { width: "95%" }
-                                : phase === "booting_spring"
-                                  ? { width: "45%" }
-                                  : { width: "15%" }
-                          }
-                          transition={{ duration: 0.5 }}
+          <div className="p-2 border-t border-[#e5e5e5] bg-white shrink-0">
+            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[#f5f5f5] border border-[#e5e5e5] text-xs">
+              <input
+                type="text"
+                placeholder={
+                  appType === "bitecraft"
+                    ? "Add delivery time filters..."
+                    : "Add priority column..."
+                }
+                disabled
+                className="w-full bg-transparent text-[11px] text-[#171717] placeholder:text-[#a3a3a3] focus:outline-none cursor-not-allowed"
+              />
+              <button
+                type="button"
+                disabled
+                className="w-5 h-5 rounded-md bg-[#171717] text-white flex items-center justify-center opacity-40 shrink-0 cursor-not-allowed"
+              >
+                <ArrowRight className="w-3 h-3" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div
+          className={`${mobileTab === "preview" ? "flex" : "hidden"
+            } lg:flex lg:w-[52%] flex-col border-r border-[#e5e5e5] min-h-0 relative bg-white`}
+        >
+          {generationState !== "PREVIEW_VISIBLE" && (
+            <div className="flex-1 flex flex-col items-center justify-center p-6 text-center bg-[#fafafa] relative overflow-hidden select-none">
+              <div className="absolute inset-0 p-4 pointer-events-none select-none opacity-25 flex flex-col gap-3">
+                {appType === "bitecraft" ? (
+                  <>
+                    <div className="h-9 w-full rounded-lg bg-neutral-200/70 border border-neutral-300/40 flex items-center justify-between px-3">
+                      <div className="w-16 h-3 rounded bg-neutral-300" />
+                      <div className="w-28 h-4 rounded-md bg-neutral-300/60" />
+                      <div className="w-8 h-4 rounded-md bg-neutral-300/60" />
+                    </div>
+                    <div className="h-20 w-full rounded-lg bg-neutral-200/50 border border-neutral-300/40 p-3 flex flex-col justify-end gap-1.5">
+                      <div className="w-24 h-3 rounded bg-neutral-300" />
+                      <div className="w-40 h-2 rounded bg-neutral-300/60" />
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 flex-1">
+                      <div className="rounded-lg bg-neutral-200/40 border border-neutral-300/40 p-2 space-y-2">
+                        <div className="h-14 rounded bg-neutral-300/60" />
+                        <div className="w-3/4 h-2 rounded bg-neutral-300" />
+                        <div className="w-1/2 h-2 rounded bg-neutral-300/60" />
+                      </div>
+                      <div className="rounded-lg bg-neutral-200/40 border border-neutral-300/40 p-2 space-y-2">
+                        <div className="h-14 rounded bg-neutral-300/60" />
+                        <div className="w-3/4 h-2 rounded bg-neutral-300" />
+                        <div className="w-1/2 h-2 rounded bg-neutral-300/60" />
+                      </div>
+                      <div className="hidden sm:block rounded-lg bg-neutral-200/40 border border-neutral-300/40 p-2 space-y-2">
+                        <div className="h-14 rounded bg-neutral-300/60" />
+                        <div className="w-3/4 h-2 rounded bg-neutral-300" />
+                        <div className="w-1/2 h-2 rounded bg-neutral-300/60" />
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="h-9 w-full rounded-lg bg-neutral-200/70 border border-neutral-300/40 flex items-center justify-between px-3">
+                      <div className="w-20 h-3 rounded bg-neutral-300" />
+                      <div className="w-32 h-4 rounded-md bg-neutral-300/60" />
+                      <div className="w-12 h-4 rounded-md bg-neutral-300/60" />
+                    </div>
+                    <div className="grid grid-cols-3 gap-2.5 flex-1">
+                      <div className="rounded-lg bg-neutral-200/40 border border-neutral-300/40 p-2 space-y-2">
+                        <div className="w-16 h-3 rounded bg-neutral-300/70" />
+                        <div className="h-12 rounded bg-neutral-300/50" />
+                        <div className="h-12 rounded bg-neutral-300/50" />
+                      </div>
+                      <div className="rounded-lg bg-neutral-200/40 border border-neutral-300/40 p-2 space-y-2">
+                        <div className="w-16 h-3 rounded bg-neutral-300/70" />
+                        <div className="h-12 rounded bg-neutral-300/50" />
+                        <div className="h-12 rounded bg-neutral-300/50" />
+                      </div>
+                      <div className="rounded-lg bg-neutral-200/40 border border-neutral-300/40 p-2 space-y-2">
+                        <div className="w-16 h-3 rounded bg-neutral-300/70" />
+                        <div className="h-12 rounded bg-neutral-300/50" />
+                        <div className="h-12 rounded bg-neutral-300/50" />
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              <div className="relative z-10 px-6 py-5 rounded-xl bg-white/80 backdrop-blur-md border border-neutral-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.03),0_16px_36px_-6px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.95)] flex flex-col items-center justify-center max-w-[280px] w-full space-y-3">
+                {(generationState === "ANALYZING" ||
+                  generationState === "GENERATING_CODE" ||
+                  generationState === "BUILDING") && (
+                    <>
+                      <div className="w-4 h-4 border-[1.5px] border-neutral-200 border-t-neutral-900 rounded-full animate-spin" />
+                      <div className="space-y-1">
+                        <p className="text-[12px] font-semibold text-neutral-900 tracking-tight">Building your application</p>
+                        <p className="text-[11px] text-neutral-500 font-sans">
+                          {generationState === "ANALYZING" && "Understanding application requirements..."}
+                          {generationState === "GENERATING_CODE" && `Creating ${activeFileObject.name.replace("src/", "")}...`}
+                          {generationState === "BUILDING" && "Putting everything together..."}
+                        </p>
+                      </div>
+                      <div className="w-44 h-1 bg-neutral-100 rounded-full overflow-hidden border border-neutral-200/50">
+                        <div
+                          className="h-full bg-neutral-900 rounded-full transition-all duration-300 ease-out"
+                          style={{
+                            width:
+                              generationState === "ANALYZING"
+                                ? "25%"
+                                : generationState === "GENERATING_CODE"
+                                  ? `${25 + Math.round((generatedCodeLineCount / Math.max(activeFileObject.lines.length, 1)) * 60)}%`
+                                  : "94%",
+                          }}
                         />
                       </div>
+                    </>
+                  )}
+
+                {generationState === "READY" && (
+                  <>
+                    <div className="w-5 h-5 rounded-full bg-neutral-900 text-white flex items-center justify-center shadow-2xs">
+                      <Check className="w-3 h-3 stroke-[2]" />
+                    </div>
+                    <div className="space-y-0.5">
+                      <p className="text-[12px] font-semibold text-neutral-900 tracking-tight">Application ready</p>
+                      <p className="text-[11px] text-neutral-500 font-sans">Rendering live preview...</p>
+                    </div>
+                  </>
+                )}
+
+                {(generationState === "IDLE" || generationState === "PROMPT_SUBMITTED") && (
+                  <div className="space-y-1">
+                    <p className="text-[12px] font-medium text-neutral-600">Ready to build</p>
+                    <p className="text-[11px] text-neutral-400 font-sans">Waiting for prompt submission...</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {generationState === "PREVIEW_VISIBLE" && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className="flex-1 flex flex-col min-h-0 bg-white relative"
+            >
+              {appType === "bitecraft" && (
+                <div className="flex-1 flex flex-col min-h-0 bg-[#ffffff] relative">
+                  <div className="h-11 px-3 sm:px-4 border-b border-[#f0f0f0] flex items-center justify-between shrink-0 bg-white">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-lg bg-[#171717] text-white flex items-center justify-center font-bold text-xs shadow-2xs">
+                        <Flame className="w-3.5 h-3.5 text-amber-400" />
+                      </div>
+                      <span className="font-bold text-xs tracking-tight text-[#171717]">BiteCraft</span>
+                      <span className="text-[#e5e5e5] font-light">/</span>
+                      <span className="text-[11px] text-[#737373] hidden sm:flex items-center gap-1 font-sans">
+                        <MapPin className="w-3 h-3 text-[#737373]" /> Bengaluru, KA
+                      </span>
                     </div>
 
-                    {/* Bottom Telemetry Strip */}
-                    <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-[9.5px] font-mono text-slate-500 relative z-10">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-slate-400">PIPELINE:</span>
-                        <span className="text-slate-700 font-medium">EVENT-DRIVEN</span>
-                      </div>
-                      <div className="flex items-center gap-2.5">
-                        <span>KAFKA: READY</span>
-                        <span className="text-emerald-600 font-semibold">HOT-RELOAD</span>
-                      </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        recordUserInteraction();
+                        setIsCartOpen(!isCartOpen);
+                      }}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#171717] hover:bg-[#303030] text-white text-[11px] font-sans font-medium transition-all active:scale-[0.98] shadow-2xs cursor-pointer"
+                    >
+                      <ShoppingBag className="w-3.5 h-3.5" />
+                      <span>{cartItems.length} items</span>
+                      <span className="hidden sm:inline text-white/60">•</span>
+                      <span className="hidden sm:inline text-white/90">₹{cartTotal.toLocaleString("en-IN")}</span>
+                    </button>
+                  </div>
+
+                  <div className="px-3 sm:px-4 py-2 border-b border-[#f0f0f0] space-y-2 bg-white shrink-0">
+                    <div className="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-[#f5f5f5] border border-[#e5e5e5] text-xs">
+                      <Search className="w-3.5 h-3.5 text-[#a3a3a3] shrink-0" />
+                      <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => {
+                          recordUserInteraction();
+                          setSearchQuery(e.target.value);
+                        }}
+                        placeholder="Search burgers, pizza, biryani..."
+                        className="w-full bg-transparent text-[11px] text-[#171717] placeholder:text-[#a3a3a3] focus:outline-none"
+                      />
                     </div>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key={`${currentProject.id}-live`}
-                    initial={{ opacity: 0, scale: 0.97 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.97 }}
-                    transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                    className="flex flex-col gap-2.5 h-full justify-between"
-                  >
-                    {/* PROJECT 1: SNAKE & LADDER MULTIPLAYER PREVIEW */}
-                    {currentProject.id === "snake_ladder" && (
-                      <div className="flex-1 rounded-xl bg-white border border-slate-200/90 shadow-2xs p-2.5 sm:p-3 flex flex-col justify-between">
-                        <div className="flex items-center justify-between border-b border-slate-100 pb-1.5 sm:pb-2 gap-2">
-                          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                            <div className="w-6 h-6 rounded-md bg-amber-500/10 text-amber-600 flex items-center justify-center font-bold text-xs shrink-0">
-                              <Dice5 className="w-4 h-4" />
+
+                    <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none py-0.5">
+                      {(["All", "Burgers", "Pizza", "Biryani"] as const).map((cat) => (
+                        <button
+                          key={cat}
+                          onClick={() => {
+                            recordUserInteraction();
+                            setSelectedCategory(cat);
+                          }}
+                          className={`px-2.5 py-0.5 rounded-full text-[11px] font-sans font-medium transition-all shrink-0 cursor-pointer ${selectedCategory === cat
+                            ? "bg-[#171717] text-white shadow-2xs"
+                            : "bg-[#f5f5f5] text-[#737373] hover:text-[#171717] hover:bg-[#e5e5e5]"
+                            }`}
+                        >
+                          {cat}
+                        </button>
+                      ))}
+                      <span className="text-[10.5px] text-[#737373] font-sans font-normal ml-auto hidden sm:flex items-center gap-1">
+                        Free delivery in 25m
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex-1 p-3 overflow-y-auto min-h-0 space-y-2.5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      {filteredRestaurants.map((rest) => (
+                        <div
+                          key={rest.id}
+                          className="p-2 rounded-2xl border border-[#e5e5e5] bg-white shadow-[0_1px_0_rgba(255,255,255,0.9)_inset,0_1px_3px_rgba(0,0,0,0.02)] hover:border-[#d4d4d8] transition-all flex flex-col justify-between group/card"
+                        >
+                          <div>
+                            <div className="relative h-24 sm:h-26 w-full rounded-xl overflow-hidden bg-neutral-100 mb-2">
+                              <Image
+                                src={rest.image}
+                                alt={rest.name}
+                                fill
+                                priority
+                                loading="eager"
+                                sizes="(max-width: 768px) 100vw, 300px"
+                                className="object-cover group-hover/card:scale-105 transition-transform duration-300"
+                              />
+                              <span className="absolute top-1.5 left-1.5 px-1.5 py-0.2 rounded-md bg-white/95 text-[9px] font-sans font-semibold text-[#171717] shadow-xs">
+                                {rest.badge}
+                              </span>
+                              <span className="absolute bottom-1.5 right-1.5 px-1.5 py-0.2 rounded-md bg-[#171717]/85 text-[9px] font-sans font-medium text-white shadow-xs flex items-center gap-0.5">
+                                <Clock className="w-2.5 h-2.5" /> {rest.time}
+                              </span>
                             </div>
-                            <div className="min-w-0">
-                              <div className="text-xs font-semibold text-slate-900 truncate">Snake &amp; Ladder Multiplayer</div>
-                              <div className="text-[9px] sm:text-[9.5px] text-slate-400 font-mono truncate">Live WebSocket Session #842</div>
+
+                            <div className="flex items-baseline justify-between gap-1">
+                              <h3 className="font-semibold text-xs text-[#171717] truncate">{rest.name}</h3>
+                              <span className="text-[10.5px] font-medium text-[#78350f] bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200/60 font-sans shrink-0 flex items-center gap-0.5">
+                                <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-500" />
+                                <span>{rest.rating}</span>
+                              </span>
                             </div>
+
+                            <p className="text-[10.5px] text-[#737373] truncate font-sans mt-0.5">
+                              {rest.featuredItem} • ₹{rest.price}
+                            </p>
                           </div>
-                          <span className="text-[9.5px] sm:text-[10.5px] font-mono font-medium text-emerald-700 shrink-0 truncate max-w-[150px] sm:max-w-none text-right">
-                            {gameMessage}
-                          </span>
-                        </div>
 
-                        {/* Interactive 5x4 Grid Board */}
-                        <div className="grid grid-cols-5 gap-1 sm:gap-1.5 py-1.5 sm:py-2">
-                          {[100, 99, 98, 97, 96, 75, 76, 77, 78, 81, 52, 51, 50, 49, 42, 10, 16, 21, 25, 30].map(
-                            (cell) => {
-                              const isPlayerHere = cell === playerPosition;
-                              const isSnake = cell === 99 || cell === 75 || cell === 52;
-                              const isLadder = cell === 42 || cell === 21 || cell === 81;
-                              return (
-                                <div
-                                  key={cell}
-                                  className={`h-6 sm:h-7 rounded-md border flex items-center justify-between px-1 text-[8.5px] sm:text-[9.5px] font-mono transition-all duration-300 ${isPlayerHere
-                                    ? "bg-blue-600 text-white font-bold border-blue-600 shadow-sm scale-105"
-                                    : isSnake
-                                      ? "bg-red-50 text-red-600 border-red-200 font-medium"
-                                      : isLadder
-                                        ? "bg-emerald-50 text-emerald-700 border-emerald-200 font-medium"
-                                        : "bg-slate-50 text-slate-600 border-slate-200/70"
-                                    }`}
-                                >
-                                  <span>{cell}</span>
-                                  {isPlayerHere && <span className="text-[7.5px] sm:text-[8px] bg-white text-blue-600 rounded px-0.5 sm:px-1">YOU</span>}
-                                  {isSnake && !isPlayerHere && <span className="text-[7.5px] sm:text-[8px]">🐍</span>}
-                                  {isLadder && !isPlayerHere && <span className="text-[7.5px] sm:text-[8px]">🪜</span>}
+                          <button
+                            type="button"
+                            onClick={() => handleAddToCart(rest)}
+                            className={`mt-2 w-full py-1.5 rounded-xl text-[11px] font-sans font-medium transition-all flex items-center justify-center gap-1 cursor-pointer active:scale-[0.98] ${addedNoticeId === rest.id
+                              ? "bg-[#262626] text-white shadow-xs"
+                              : "bg-[#171717] hover:bg-[#303030] text-white shadow-2xs"
+                              }`}
+                          >
+                            {addedNoticeId === rest.id ? (
+                              <>
+                                <Check className="w-3 h-3 text-white" />
+                                <span>Added to Cart!</span>
+                              </>
+                            ) : (
+                              <>
+                                <Plus className="w-3 h-3" />
+                                <span>Add to Cart • ₹{rest.price}</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <AnimatePresence>
+                    {isCartOpen && (
+                      <motion.div
+                        initial={{ x: "100%", opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        exit={{ x: "100%", opacity: 0 }}
+                        transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                        className="absolute inset-y-0 right-0 w-64 bg-white border-l border-[#e5e5e5] shadow-xl p-3 flex flex-col justify-between z-20"
+                      >
+                        <div>
+                          <div className="flex items-center justify-between pb-2 border-b border-[#f0f0f0]">
+                            <div className="flex items-center gap-1.5">
+                              <ShoppingBag className="w-3.5 h-3.5 text-[#171717]" />
+                              <h4 className="font-semibold text-xs text-[#171717]">
+                                Your Basket ({cartItems.length})
+                              </h4>
+                            </div>
+                            <button
+                              onClick={() => {
+                                recordUserInteraction();
+                                setIsCartOpen(false);
+                              }}
+                              className="p-1 rounded-md text-[#737373] hover:text-[#171717] hover:bg-[#f5f5f5]"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+
+                          <div className="py-2 space-y-2 max-h-52 overflow-y-auto">
+                            {cartItems.map((item, idx) => (
+                              <div
+                                key={item.id}
+                                className="flex items-center justify-between text-xs p-1.5 rounded-lg bg-[#fafafa] border border-[#f0f0f0]"
+                              >
+                                <div className="truncate pr-1">
+                                  <span className="font-medium text-[#171717] block truncate text-[11px]">
+                                    {item.name}
+                                  </span>
+                                  <span className="text-[10px] text-[#737373]">₹{item.price}</span>
                                 </div>
-                              );
-                            }
-                          )}
-                        </div>
-
-                        {/* Live Players & Dice Action Strip */}
-                        <div className="flex items-center justify-between pt-1.5 sm:pt-2 border-t border-slate-100 text-[9.5px] sm:text-[10.5px]">
-                          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                            <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
-                              <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-blue-600" />
-                              <span className="font-medium text-slate-800">
-                                <span className="hidden sm:inline">Player 1 </span>(Adarsh)
-                              </span>
-                              <span className="text-slate-400 font-mono text-[8.5px] sm:text-[9.5px]">Cell {playerPosition}</span>
-                            </div>
-                            <div className="hidden xs:flex items-center gap-1 sm:gap-1.5 text-slate-400 shrink-0">
-                              <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-slate-300" />
-                              <span>AI</span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-                            <span className="text-[9px] sm:text-[10px] text-slate-500 font-mono">Roll:</span>
-                            <span className="w-4.5 h-4.5 sm:w-5 sm:h-5 rounded bg-blue-50 border border-blue-200 text-blue-700 font-bold font-mono flex items-center justify-center text-[10px] sm:text-xs shadow-2xs">
-                              {diceValue}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* PROJECT 2: REAL-TIME COLLABORATIVE KANBAN PREVIEW */}
-                    {currentProject.id === "kanban_board" && (
-                      <div className="flex-1 rounded-xl bg-white border border-slate-200/90 shadow-2xs p-3 flex flex-col justify-between">
-                        <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                          <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-md bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold text-xs">
-                              <Kanban className="w-4 h-4" />
-                            </div>
-                            <div>
-                              <div className="text-xs font-semibold text-slate-900">Collaborative Kanban</div>
-                              <div className="text-[9.5px] text-slate-400 font-mono">Kafka Event Stream #412</div>
-                            </div>
-                          </div>
-                          <span className="text-[9.5px] sm:text-[10px] font-mono font-medium text-slate-500">
-                            {kanbanStage === 0 && "Task #104 moved to 'In Progress'"}
-                            {kanbanStage === 1 && "Task #102 deployed to 'Done'"}
-                            {kanbanStage === 2 && "Synchronized with 12 WebSocket clients"}
-                          </span>
-                        </div>
-
-                        {/* Kanban Columns */}
-                        <div className="grid grid-cols-3 gap-2 py-2">
-                          {/* Column 1: Backlog */}
-                          <div className="rounded-lg bg-slate-50 border border-slate-200/80 p-2 flex flex-col gap-1.5">
-                            <div className="flex items-center justify-between text-[9.5px] font-mono text-slate-500 px-0.5">
-                              <span className="font-semibold text-slate-700">To Do</span>
-                              <span className="w-3.5 h-3.5 rounded-full bg-white border border-slate-200 text-slate-600 flex items-center justify-center text-[8.5px] font-semibold">
-                                1
-                              </span>
-                            </div>
-                            <div className="p-2 rounded-md bg-white border border-slate-200/90 shadow-2xs text-[10px]">
-                              <span className="text-slate-800 font-medium block truncate">
-                                OAuth 2.0 PKCE Auth
-                              </span>
-                              <span className="text-[9px] text-purple-600 font-mono mt-0.5 block font-medium">JWT • RS256</span>
-                            </div>
-                          </div>
-
-                          {/* Column 2: In Progress */}
-                          <div className="rounded-lg bg-blue-50/50 border border-blue-200/80 p-2 flex flex-col gap-1.5">
-                            <div className="flex items-center justify-between text-[9.5px] font-mono text-blue-700 px-0.5">
-                              <span className="font-semibold">In Progress</span>
-                              <span className="w-3.5 h-3.5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[8.5px] font-semibold shadow-2xs">
-                                1
-                              </span>
-                            </div>
-                            <div className="p-2 rounded-md bg-white border border-blue-200 shadow-2xs text-[10px]">
-                              <span className="text-slate-900 font-semibold block truncate">
-                                AST Stream Synthesis
-                              </span>
-                              <div className="flex items-center justify-between mt-1 text-[8.5px] font-mono text-blue-600">
-                                <span>Kafka Bus</span>
-                                <span className="font-semibold">Active</span>
+                                <button
+                                  onClick={() => handleRemoveFromCart(idx)}
+                                  className="text-[10px] text-[#a3a3a3] hover:text-red-600 font-sans p-1"
+                                  title="Remove"
+                                >
+                                  ×
+                                </button>
                               </div>
-                            </div>
-                          </div>
-
-                          {/* Column 3: Done */}
-                          <div className="rounded-lg bg-emerald-50/40 border border-emerald-200/80 p-2 flex flex-col gap-1.5">
-                            <div className="flex items-center justify-between text-[9.5px] font-mono text-emerald-700 px-0.5">
-                              <span className="font-semibold">Done</span>
-                              <span className="w-3.5 h-3.5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[8.5px] font-semibold shadow-2xs">
-                                2
-                              </span>
-                            </div>
-                            <div className="p-2 rounded-md bg-white border border-emerald-200/80 shadow-2xs text-[10px]">
-                              <span className="text-slate-800 font-medium block truncate">
-                                Container Sandbox
-                              </span>
-                              <span className="text-[9px] text-emerald-600 font-mono mt-0.5 block font-medium">gVisor Isolated</span>
-                            </div>
+                            ))}
                           </div>
                         </div>
 
-                        {/* Live Footer info */}
-                        <div className="flex items-center justify-between pt-1 border-t border-slate-100 text-[10px] text-slate-500 font-mono">
-                          <span>Board: code2live-production</span>
-                          <span className="text-blue-600 font-medium">Real-Time Sync: Online</span>
+                        <div className="pt-2 border-t border-[#f0f0f0] space-y-2">
+                          <div className="flex justify-between text-xs font-semibold text-[#171717]">
+                            <span>Total</span>
+                            <span>₹{cartTotal.toLocaleString("en-IN")}</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              recordUserInteraction();
+                              alert(`Order confirmed for ${cartItems.length} items! Total: ₹${cartTotal.toLocaleString("en-IN")}`);
+                            }}
+                            className="w-full py-2 rounded-xl bg-[#171717] hover:bg-[#303030] text-white text-xs font-medium flex items-center justify-center gap-1.5 shadow-2xs active:scale-[0.98] cursor-pointer"
+                          >
+                            <span>Checkout Order</span>
+                            <ArrowRight className="w-3.5 h-3.5 text-white/80" />
+                          </button>
                         </div>
-                      </div>
+                      </motion.div>
                     )}
+                  </AnimatePresence>
+                </div>
+              )}
 
-                    {/* Real-Time Live Activity Feed Strip */}
-                    <div className="flex items-center justify-between px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-white border border-slate-200/90 shadow-2xs text-[9.5px] sm:text-[10.5px] font-mono">
-                      <div className="flex items-center gap-1.5 sm:gap-2 truncate">
-                        <Radio className="w-3 h-3 text-emerald-600 shrink-0" />
-                        <span className="text-slate-700 truncate">
-                          WebSocket: AST pipeline streaming active
+              {appType === "flowboard" && (
+                <div className="flex-1 flex flex-col min-h-0 bg-[#fafafa] text-[#18181b]">
+                  <div className="h-11 px-3 sm:px-4 border-b border-[#e5e5e5] bg-white flex items-center justify-between shrink-0">
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 rounded-[6px] bg-[#18181b] border border-[#27272a] flex items-center justify-center shadow-2xs shrink-0">
+                        <svg
+                          width="12"
+                          height="12"
+                          viewBox="0 0 16 16"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                          aria-hidden="true"
+                        >
+                          <rect x="2" y="3" width="3.2" height="10" rx="1.2" fill="#71717a" />
+                          <rect x="6.4" y="1.5" width="3.2" height="13" rx="1.2" fill="#d4d4d8" />
+                          <rect x="10.8" y="4.5" width="3.2" height="8.5" rx="1.2" fill="#3b82f6" />
+                        </svg>
+                      </div>
+                      <span className="font-semibold text-xs tracking-tight text-[#171717]">FlowBoard</span>
+                      <span className="text-[#d4d4d8] font-light">/</span>
+                      <span className="text-[11px] font-medium text-[#737373]">
+                        Sprint {sprintInfo.sprintNumber}
+                      </span>
+                      <span className="hidden sm:inline-flex items-center text-[10.5px] text-[#71717a] font-sans font-normal ml-0.5">
+                        <span className="text-[#d4d4d8] mx-1.5 font-light">/</span>
+                        <span>{sprintInfo.formattedDateRange}</span>
+                        <span className="ml-2 px-1.5 py-0.5 rounded text-[9.5px] font-medium bg-[#f4f4f5] text-[#52525b] border border-[#e4e4e7]">
+                          {sprintInfo.status}
+                        </span>
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center p-0.5 rounded-lg bg-[#f4f4f5] border border-[#e4e4e7] text-[10px] font-medium select-none">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            recordUserInteraction();
+                            setFlowboardView("board");
+                          }}
+                          className={`px-2 py-0.5 rounded-md transition-all cursor-pointer ${
+                            flowboardView === "board"
+                              ? "bg-white text-[#18181b] shadow-2xs font-semibold"
+                              : "text-[#71717a] hover:text-[#18181b]"
+                          }`}
+                        >
+                          Board
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            recordUserInteraction();
+                            setFlowboardView("list");
+                          }}
+                          className={`px-2 py-0.5 rounded-md transition-all cursor-pointer ${
+                            flowboardView === "list"
+                              ? "bg-white text-[#18181b] shadow-2xs font-semibold"
+                              : "text-[#71717a] hover:text-[#18181b]"
+                          }`}
+                        >
+                          List
+                        </button>
+                      </div>
+
+                      <div className="flex items-center -space-x-1.5 pl-1">
+                        <span className="w-5 h-5 rounded-full bg-[#18181b] text-white font-medium text-[8px] flex items-center justify-center ring-2 ring-white">
+                          AK
+                        </span>
+                        <span className="w-5 h-5 rounded-full bg-[#4f46e5] text-white font-medium text-[8px] flex items-center justify-center ring-2 ring-white">
+                          SM
+                        </span>
+                        <span className="w-5 h-5 rounded-full bg-[#475569] text-white font-medium text-[8px] flex items-center justify-center ring-2 ring-white">
+                          RV
                         </span>
                       </div>
-                      <span className="text-emerald-700 font-semibold shrink-0 ml-1">12 Clients</span>
+
+                      <button
+                        type="button"
+                        onClick={handleAddKanbanTask}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#171717] hover:bg-black text-white text-[11px] font-sans font-medium transition-all active:scale-[0.98] shadow-2xs cursor-pointer ml-1"
+                      >
+                        <Plus className="w-3 h-3" />
+                        <span>New Task</span>
+                      </button>
                     </div>
-                  </motion.div>
-                )
-              ) : (
-                <motion.div
-                  key="telemetry"
-                  initial={{ opacity: 0, y: 3 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -3 }}
-                  transition={{ duration: 0.15 }}
-                  className="grid grid-cols-2 gap-2 sm:gap-2.5 h-full content-center"
-                >
-                  <div className="p-2 sm:p-2.5 rounded-lg bg-white border border-slate-200/90 shadow-2xs">
-                    <div className="flex items-center justify-between text-slate-500 text-[9.5px] sm:text-[10px] mb-0.5">
-                      <span>WebSocket Clients</span>
-                      <Activity className="w-3.5 h-3.5 text-emerald-600" />
-                    </div>
-                    <span className="text-sm sm:text-base font-semibold text-slate-900 font-mono">
-                      12 Connected
-                    </span>
-                    <span className="text-[8.5px] sm:text-[9px] text-emerald-600 font-mono block mt-0.5 font-medium">
-                      0 dropped frames
-                    </span>
                   </div>
 
-                  <div className="p-2 sm:p-2.5 rounded-lg bg-white border border-slate-200/90 shadow-2xs">
-                    <div className="flex items-center justify-between text-slate-500 text-[9.5px] sm:text-[10px] mb-0.5">
-                      <span>AST Latency</span>
-                      <Clock className="w-3.5 h-3.5 text-blue-600" />
-                    </div>
-                    <span className="text-sm sm:text-base font-semibold text-blue-600 font-mono">18ms</span>
-                    <span className="text-[8.5px] sm:text-[9px] text-slate-500 font-mono block mt-0.5 truncate">
-                      p99: 22ms synthesis
-                    </span>
-                  </div>
+                  {flowboardView === "board" ? (
+                    <div className="flex-1 p-3 overflow-x-auto overflow-y-hidden min-h-0 bg-[#fafafa]">
+                      <div className="grid grid-cols-3 gap-2.5 h-full min-w-[500px]">
+                        <div className="flex flex-col h-full bg-[#f4f4f5]/70 rounded-xl border border-[#e4e4e7] p-2 overflow-hidden">
+                          <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#e4e4e7]/70">
+                            <div className="flex items-center gap-1.5">
+                              <Circle className="w-3.5 h-3.5 text-[#a1a1aa] stroke-[1.5]" />
+                              <span className="text-[11.5px] font-semibold text-[#18181b] tracking-tight">To Do</span>
+                              <span className="text-[11px] font-sans font-normal text-[#a1a1aa] ml-0.5">
+                                {kanbanTasks.filter((t) => t.status === "todo").length}
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={handleAddKanbanTask}
+                              title="Add task"
+                              className="p-1 rounded text-[#a1a1aa] hover:text-[#18181b] hover:bg-white transition-colors cursor-pointer"
+                            >
+                              <Plus className="w-3 h-3" />
+                            </button>
+                          </div>
 
-                  <div className="p-2 sm:p-2.5 rounded-lg bg-white border border-slate-200/90 shadow-2xs">
-                    <div className="flex items-center justify-between text-slate-500 text-[9.5px] sm:text-[10px] mb-0.5">
-                      <span>Kafka Throughput</span>
-                      <Cpu className="w-3.5 h-3.5 text-amber-600" />
-                    </div>
-                    <span className="text-sm sm:text-base font-semibold text-slate-900 font-mono">
-                      4,800 evt/s
-                    </span>
-                    <span className="text-[8.5px] sm:text-[9px] text-slate-500 font-mono block mt-0.5 truncate">
-                      codegen.req part 0
-                    </span>
-                  </div>
+                          <div className="flex-1 overflow-y-auto space-y-2 pr-0.5">
+                            {kanbanTasks
+                              .filter((t) => t.status === "todo")
+                              .map((task) => (
+                                <div
+                                  key={task.id}
+                                  onClick={() => handleMoveKanbanTask(task.id)}
+                                  className="p-2.5 rounded-lg bg-white border border-[#e4e4e7] shadow-2xs hover:border-[#a1a1aa] hover:shadow-xs transition-all cursor-pointer group/card select-none"
+                                >
+                                  <div className="flex items-center justify-between gap-1 mb-1">
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="text-[11.5px] font-sans font-medium text-[#71717a]">
+                                        {task.key}
+                                      </span>
+                                      <span className="text-[10px] font-sans font-medium px-1.5 py-0.5 rounded-md bg-[#f4f4f5] text-[#52525b] border border-[#e4e4e7]">
+                                        {task.tag}
+                                      </span>
+                                    </div>
+                                    <span className="text-[10px] font-sans font-medium text-[#71717a] group-hover/card:text-[#18181b] opacity-0 group-hover/card:opacity-100 transition-opacity">
+                                      Start →
+                                    </span>
+                                  </div>
+                                  <h4 className="text-[12px] font-medium text-[#18181b] leading-snug line-clamp-2 my-1.5">
+                                    {task.title}
+                                  </h4>
+                                  <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-[#f4f4f5] text-[10px] font-sans text-[#71717a]">
+                                    <div className="flex items-center gap-1.5">
+                                      {task.priority === "High" ? (
+                                        <span className="inline-flex items-center gap-0.5 text-rose-600 font-medium">
+                                          <Flame className="w-2.5 h-2.5 text-rose-500" /> High
+                                        </span>
+                                      ) : (
+                                        <span className="text-[#71717a] font-medium">{task.priority}</span>
+                                      )}
+                                      <span className="text-[#d4d4d8]">•</span>
+                                      <span className="inline-flex items-center gap-1 text-[#71717a]">
+                                        <Calendar className="w-2.5 h-2.5 text-[#a1a1aa]" /> {task.dueDate}
+                                      </span>
+                                    </div>
+                                    <span className="w-4.5 h-4.5 rounded-full bg-[#18181b] text-white font-medium text-[8px] flex items-center justify-center ring-1 ring-white shrink-0">
+                                      {task.assignee.initials}
+                                    </span>
+                                  </div>
+                                </div>
+                              ))}
+                          </div>
+                        </div>
 
-                  <div className="p-2 sm:p-2.5 rounded-lg bg-white border border-slate-200/90 shadow-2xs">
-                    <div className="flex items-center justify-between text-slate-500 text-[9.5px] sm:text-[10px] mb-0.5">
-                      <span>Container Runtime</span>
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                        <div className="flex flex-col h-full bg-[#f4f4f5]/70 rounded-xl border border-[#e4e4e7] p-2 overflow-hidden">
+                          <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#e4e4e7]/70">
+                            <div className="flex items-center gap-1.5">
+                              <div className="w-3.5 h-3.5 rounded-full border border-[#d97706]/70 flex items-center justify-center shrink-0">
+                                <div className="w-1.5 h-1.5 rounded-full bg-[#d97706]" />
+                              </div>
+                              <span className="text-[11.5px] font-semibold text-[#18181b] tracking-tight">In Progress</span>
+                              <span className="text-[11px] font-sans font-normal text-[#a1a1aa] ml-0.5">
+                                {kanbanTasks.filter((t) => t.status === "in_progress").length}
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={handleAddKanbanTask}
+                              title="Add task"
+                              className="p-1 rounded text-[#a1a1aa] hover:text-[#18181b] hover:bg-white transition-colors cursor-pointer"
+                            >
+                              <Plus className="w-3 h-3" />
+                            </button>
+                          </div>
+
+                          <div className="flex-1 overflow-y-auto space-y-2 pr-0.5">
+                            {kanbanTasks
+                              .filter((t) => t.status === "in_progress")
+                              .map((task) => (
+                                <div
+                                  key={task.id}
+                                  onClick={() => handleMoveKanbanTask(task.id)}
+                                  className="p-2.5 rounded-lg bg-white border border-[#e4e4e7] shadow-2xs hover:border-[#a1a1aa] hover:shadow-xs transition-all cursor-pointer group/card select-none"
+                                >
+                                  <div className="flex items-center justify-between gap-1 mb-1">
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="text-[11.5px] font-sans font-medium text-[#71717a]">
+                                        {task.key}
+                                      </span>
+                                      <span className="text-[10px] font-sans font-medium px-1.5 py-0.5 rounded-md bg-[#f4f4f5] text-[#52525b] border border-[#e4e4e7]">
+                                        {task.tag}
+                                      </span>
+                                    </div>
+                                    <span className="text-[10px] font-sans font-medium text-[#71717a] group-hover/card:text-[#18181b] opacity-0 group-hover/card:opacity-100 transition-opacity">
+                                      Done →
+                                    </span>
+                                  </div>
+                                  <h4 className="text-[12px] font-medium text-[#18181b] leading-snug line-clamp-2 my-1.5">
+                                    {task.title}
+                                  </h4>
+                                  <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-[#f4f4f5] text-[10px] font-sans text-[#71717a]">
+                                    <div className="flex items-center gap-1.5">
+                                      {task.priority === "High" ? (
+                                        <span className="inline-flex items-center gap-0.5 text-rose-600 font-medium">
+                                          <Flame className="w-2.5 h-2.5 text-rose-500" /> High
+                                        </span>
+                                      ) : (
+                                        <span className="text-[#71717a] font-medium">{task.priority}</span>
+                                      )}
+                                      <span className="text-[#d4d4d8]">•</span>
+                                      <span className="inline-flex items-center gap-1 text-[#71717a]">
+                                        <Calendar className="w-2.5 h-2.5 text-[#a1a1aa]" /> {task.dueDate}
+                                      </span>
+                                    </div>
+                                    <span className="w-4.5 h-4.5 rounded-full bg-[#4f46e5] text-white font-medium text-[8px] flex items-center justify-center ring-1 ring-white shrink-0">
+                                      {task.assignee.initials}
+                                    </span>
+                                  </div>
+                                </div>
+                              ))}
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col h-full bg-[#f4f4f5]/70 rounded-xl border border-[#e4e4e7] p-2 overflow-hidden">
+                          <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#e4e4e7]/70">
+                            <div className="flex items-center gap-1.5">
+                              <div className="w-3.5 h-3.5 rounded-full bg-[#5e6ad2] text-white flex items-center justify-center shrink-0 shadow-2xs">
+                                <Check className="w-2.5 h-2.5 stroke-[2.5]" />
+                              </div>
+                              <span className="text-[11.5px] font-semibold text-[#18181b] tracking-tight">Completed</span>
+                              <span className="text-[11px] font-sans font-normal text-[#a1a1aa] ml-0.5">
+                                {kanbanTasks.filter((t) => t.status === "done").length}
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={handleAddKanbanTask}
+                              title="Add task"
+                              className="p-1 rounded text-[#a1a1aa] hover:text-[#18181b] hover:bg-white transition-colors cursor-pointer"
+                            >
+                              <Plus className="w-3 h-3" />
+                            </button>
+                          </div>
+
+                          <div className="flex-1 overflow-y-auto space-y-2 pr-0.5">
+                            {kanbanTasks
+                              .filter((t) => t.status === "done")
+                              .map((task) => (
+                                <div
+                                  key={task.id}
+                                  onClick={() => handleMoveKanbanTask(task.id)}
+                                  className="p-2.5 rounded-lg bg-white border border-[#e4e4e7] shadow-2xs hover:border-[#a1a1aa] hover:shadow-xs transition-all cursor-pointer group/card opacity-80 select-none"
+                                >
+                                  <div className="flex items-center justify-between gap-1 mb-1">
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="text-[11.5px] font-sans font-medium text-[#71717a]">
+                                        {task.key}
+                                      </span>
+                                      <span className="text-[10px] font-sans font-medium px-1.5 py-0.5 rounded-md bg-[#f4f4f5] text-[#52525b] border border-[#e4e4e7]">
+                                        {task.tag}
+                                      </span>
+                                    </div>
+                                    <span className="text-[10px] font-sans font-medium text-[#71717a] opacity-0 group-hover/card:opacity-100 transition-opacity">
+                                      Reopen ↺
+                                    </span>
+                                  </div>
+                                  <h4 className="text-[12px] font-medium leading-snug line-through text-[#a1a1aa] line-clamp-2 my-1.5">
+                                    {task.title}
+                                  </h4>
+                                  <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-[#f4f4f5] text-[10px] font-sans text-[#71717a]">
+                                    <div className="flex items-center gap-1.5">
+                                      <div className="w-3 h-3 rounded-full bg-[#5e6ad2] text-white flex items-center justify-center shrink-0">
+                                        <Check className="w-2 h-2 stroke-[2.5]" />
+                                      </div>
+                                      <span className="text-[10px] text-[#71717a] font-medium">Done</span>
+                                    </div>
+                                    <span className="w-4.5 h-4.5 rounded-full bg-[#18181b] text-white font-medium text-[8px] flex items-center justify-center ring-1 ring-white shrink-0">
+                                      {task.assignee.initials}
+                                    </span>
+                                  </div>
+                                </div>
+                              ))}
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <span className="text-sm sm:text-base font-semibold text-emerald-600 font-mono">
-                      Isolated
-                    </span>
-                    <span className="text-[8.5px] sm:text-[9px] text-slate-500 font-mono block mt-0.5">
-                      Zero-Trust gVisor
-                    </span>
-                  </div>
-                </motion.div>
+                  ) : (
+                    <div className="flex-1 p-3 overflow-y-auto min-h-0 bg-[#fafafa] space-y-3 select-none">
+                      <div className="bg-white rounded-xl border border-[#e4e4e7] shadow-2xs overflow-hidden">
+                        <div className="px-3 py-2 bg-[#f4f4f5]/80 border-b border-[#e4e4e7] flex items-center justify-between">
+                          <div className="flex items-center gap-1.5">
+                            <Circle className="w-3.5 h-3.5 text-[#a1a1aa] stroke-[1.5]" />
+                            <span className="text-[11.5px] font-semibold text-[#18181b] tracking-tight">To Do</span>
+                            <span className="text-[11px] font-sans font-normal text-[#a1a1aa] ml-0.5">
+                              {kanbanTasks.filter((t) => t.status === "todo").length}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={handleAddKanbanTask}
+                            title="Add task"
+                            className="p-1 rounded text-[#a1a1aa] hover:text-[#18181b] hover:bg-white transition-colors cursor-pointer"
+                          >
+                            <Plus className="w-3 h-3" />
+                          </button>
+                        </div>
+                        <div className="divide-y divide-[#f4f4f5]">
+                          {kanbanTasks
+                            .filter((t) => t.status === "todo")
+                            .map((task) => (
+                              <div
+                                key={task.id}
+                                onClick={() => handleMoveKanbanTask(task.id)}
+                                className="px-3 py-2.5 flex items-center justify-between gap-3 hover:bg-[#fafafa] transition-colors cursor-pointer group/row"
+                              >
+                                <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                                  <div className="w-4 h-4 rounded-full border border-[#d4d4d8] group-hover/row:border-[#18181b] flex items-center justify-center shrink-0 transition-colors">
+                                    <Circle className="w-2.5 h-2.5 text-transparent group-hover/row:text-[#a1a1aa] fill-current transition-colors" />
+                                  </div>
+                                  <span className="text-[11.5px] font-sans font-medium text-[#71717a] shrink-0">
+                                    {task.key}
+                                  </span>
+                                  <h4 className="text-[12px] font-medium text-[#18181b] truncate">
+                                    {task.title}
+                                  </h4>
+                                  <span className="hidden sm:inline-flex text-[9.5px] font-sans font-medium px-1.5 py-0.5 rounded-md bg-[#f4f4f5] text-[#52525b] border border-[#e4e4e7] shrink-0">
+                                    {task.tag}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2.5 shrink-0 text-[10px] font-sans text-[#71717a]">
+                                  {task.priority === "High" ? (
+                                    <span className="inline-flex items-center gap-0.5 text-rose-600 font-medium">
+                                      <Flame className="w-2.5 h-2.5 text-rose-500" /> High
+                                    </span>
+                                  ) : (
+                                    <span className="text-[#71717a] font-medium">{task.priority}</span>
+                                  )}
+                                  <span className="hidden md:inline-flex items-center gap-1 text-[#71717a]">
+                                    <Calendar className="w-2.5 h-2.5 text-[#a1a1aa]" /> {task.dueDate}
+                                  </span>
+                                  <span className="w-4.5 h-4.5 rounded-full bg-[#18181b] text-white font-medium text-[8px] flex items-center justify-center ring-1 ring-white shrink-0">
+                                    {task.assignee.initials}
+                                  </span>
+                                  <span className="text-[10px] font-medium text-[#18181b] opacity-0 group-hover/row:opacity-100 transition-opacity hidden sm:inline-block">
+                                    Start →
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                          {kanbanTasks.filter((t) => t.status === "todo").length === 0 && (
+                            <div className="px-3 py-3 text-center text-[11px] text-[#a1a1aa] font-sans">
+                              No tasks to do
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="bg-white rounded-xl border border-[#e4e4e7] shadow-2xs overflow-hidden">
+                        <div className="px-3 py-2 bg-[#f4f4f5]/80 border-b border-[#e4e4e7] flex items-center justify-between">
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-3.5 h-3.5 rounded-full border border-[#d97706]/70 flex items-center justify-center shrink-0">
+                              <div className="w-1.5 h-1.5 rounded-full bg-[#d97706]" />
+                            </div>
+                            <span className="text-[11.5px] font-semibold text-[#18181b] tracking-tight">In Progress</span>
+                            <span className="text-[11px] font-sans font-normal text-[#a1a1aa] ml-0.5">
+                              {kanbanTasks.filter((t) => t.status === "in_progress").length}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={handleAddKanbanTask}
+                            title="Add task"
+                            className="p-1 rounded text-[#a1a1aa] hover:text-[#18181b] hover:bg-white transition-colors cursor-pointer"
+                          >
+                            <Plus className="w-3 h-3" />
+                          </button>
+                        </div>
+                        <div className="divide-y divide-[#f4f4f5]">
+                          {kanbanTasks
+                            .filter((t) => t.status === "in_progress")
+                            .map((task) => (
+                              <div
+                                key={task.id}
+                                onClick={() => handleMoveKanbanTask(task.id)}
+                                className="px-3 py-2.5 flex items-center justify-between gap-3 hover:bg-[#fafafa] transition-colors cursor-pointer group/row"
+                              >
+                                <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                                  <div className="w-4 h-4 rounded-full border border-[#d97706] flex items-center justify-center shrink-0">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-[#d97706]" />
+                                  </div>
+                                  <span className="text-[11.5px] font-sans font-medium text-[#71717a] shrink-0">
+                                    {task.key}
+                                  </span>
+                                  <h4 className="text-[12px] font-medium text-[#18181b] truncate">
+                                    {task.title}
+                                  </h4>
+                                  <span className="hidden sm:inline-flex text-[9.5px] font-sans font-medium px-1.5 py-0.5 rounded-md bg-[#f4f4f5] text-[#52525b] border border-[#e4e4e7] shrink-0">
+                                    {task.tag}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2.5 shrink-0 text-[10px] font-sans text-[#71717a]">
+                                  {task.priority === "High" ? (
+                                    <span className="inline-flex items-center gap-0.5 text-rose-600 font-medium">
+                                      <Flame className="w-2.5 h-2.5 text-rose-500" /> High
+                                    </span>
+                                  ) : (
+                                    <span className="text-[#71717a] font-medium">{task.priority}</span>
+                                  )}
+                                  <span className="hidden md:inline-flex items-center gap-1 text-[#71717a]">
+                                    <Calendar className="w-2.5 h-2.5 text-[#a1a1aa]" /> {task.dueDate}
+                                  </span>
+                                  <span className="w-4.5 h-4.5 rounded-full bg-[#4f46e5] text-white font-medium text-[8px] flex items-center justify-center ring-1 ring-white shrink-0">
+                                    {task.assignee.initials}
+                                  </span>
+                                  <span className="text-[10px] font-medium text-[#18181b] opacity-0 group-hover/row:opacity-100 transition-opacity hidden sm:inline-block">
+                                    Done →
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                          {kanbanTasks.filter((t) => t.status === "in_progress").length === 0 && (
+                            <div className="px-3 py-3 text-center text-[11px] text-[#a1a1aa] font-sans">
+                              No tasks in progress
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="bg-white rounded-xl border border-[#e4e4e7] shadow-2xs overflow-hidden opacity-90">
+                        <div className="px-3 py-2 bg-[#f4f4f5]/80 border-b border-[#e4e4e7] flex items-center justify-between">
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-3.5 h-3.5 rounded-full bg-[#5e6ad2] text-white flex items-center justify-center shrink-0 shadow-2xs">
+                              <Check className="w-2.5 h-2.5 stroke-[2.5]" />
+                            </div>
+                            <span className="text-[11.5px] font-semibold text-[#18181b] tracking-tight">Completed</span>
+                            <span className="text-[11px] font-sans font-normal text-[#a1a1aa] ml-0.5">
+                              {kanbanTasks.filter((t) => t.status === "done").length}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={handleAddKanbanTask}
+                            title="Add task"
+                            className="p-1 rounded text-[#a1a1aa] hover:text-[#18181b] hover:bg-white transition-colors cursor-pointer"
+                          >
+                            <Plus className="w-3 h-3" />
+                          </button>
+                        </div>
+                        <div className="divide-y divide-[#f4f4f5]">
+                          {kanbanTasks
+                            .filter((t) => t.status === "done")
+                            .map((task) => (
+                              <div
+                                key={task.id}
+                                onClick={() => handleMoveKanbanTask(task.id)}
+                                className="px-3 py-2.5 flex items-center justify-between gap-3 hover:bg-[#fafafa] transition-colors cursor-pointer group/row opacity-75"
+                              >
+                                <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                                  <div className="w-4 h-4 rounded-full bg-[#5e6ad2] text-white flex items-center justify-center shrink-0 shadow-2xs">
+                                    <Check className="w-2.5 h-2.5 stroke-[2.5]" />
+                                  </div>
+                                  <span className="text-[11.5px] font-sans font-medium text-[#71717a] shrink-0">
+                                    {task.key}
+                                  </span>
+                                  <h4 className="text-[12px] font-medium text-[#a1a1aa] line-through truncate">
+                                    {task.title}
+                                  </h4>
+                                  <span className="hidden sm:inline-flex text-[9.5px] font-sans font-medium px-1.5 py-0.5 rounded-md bg-[#f4f4f5] text-[#52525b] border border-[#e4e4e7] shrink-0">
+                                    {task.tag}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2.5 shrink-0 text-[10px] font-sans text-[#71717a]">
+                                  <span className="text-[10px] text-[#71717a] font-medium">Done</span>
+                                  <span className="w-4.5 h-4.5 rounded-full bg-[#18181b] text-white font-medium text-[8px] flex items-center justify-center ring-1 ring-white shrink-0">
+                                    {task.assignee.initials}
+                                  </span>
+                                  <span className="text-[10px] font-medium text-[#71717a] opacity-0 group-hover/row:opacity-100 transition-opacity hidden sm:inline-block">
+                                    Reopen ↺
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                          {kanbanTasks.filter((t) => t.status === "done").length === 0 && (
+                            <div className="px-3 py-3 text-center text-[11px] text-[#a1a1aa] font-sans">
+                              No completed tasks yet
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               )}
-            </AnimatePresence>
+            </motion.div>
+          )}
+        </div>
+
+        <div
+          className={`${mobileTab === "code" ? "flex" : "hidden"
+            } lg:flex lg:w-[25%] flex-col bg-[#111318] text-[#e6edf3] font-mono min-h-0 relative select-text overflow-hidden`}
+        >
+          <div className="h-7 px-2.5 bg-[#111318] border-b border-[#22242a] flex items-center justify-between shrink-0 select-none">
+            <div className="flex items-center gap-1.5 text-xs font-medium text-[#c9d1d9] shrink-0">
+              <Code2 className="w-3.5 h-3.5 text-[#8b949e]" />
+              <span className="text-[11px] font-sans font-medium">Code</span>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                recordUserInteraction();
+                setIsFilesOpen((prev) => !prev);
+              }}
+              className={`flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-sans transition-colors cursor-pointer border shrink-0 ${
+                isFilesOpen
+                  ? "bg-[#1f242c] text-[#f0f6fc] border-[#38444d]"
+                  : "bg-[#161b22] text-[#8b949e] hover:text-[#f0f6fc] hover:bg-[#1f242c] border-[#22242a]"
+              }`}
+              title="Browse all project files"
+            >
+              <Folder className="w-3 h-3 text-[#8b949e]" />
+              <span className="text-[10px]">Files</span>
+              <ChevronDown
+                className={`w-2.5 h-2.5 transition-transform duration-150 ${
+                  isFilesOpen ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+          </div>
+
+          <div className="h-7 px-1.5 bg-[#0d0f12] border-b border-[#22242a] flex items-center gap-1 overflow-x-auto scrollbar-none shrink-0 select-none">
+            {generatedFiles.length === 0 ? (
+              <div className="px-2 text-[10px] text-[#484f58] font-sans flex items-center gap-1.5">
+                <span>No files generated yet</span>
+              </div>
+            ) : (
+              generatedFiles.map((path) => {
+                const fileObj = activeFilesMap[path];
+                const fileName = fileObj ? fileObj.name : path.split("/").pop();
+                const isActive = activeFilePath === path;
+                const isGeneratingThis = currentGeneratingFile === path;
+                return (
+                  <motion.button
+                    key={path}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.2 }}
+                    type="button"
+                    onClick={() => {
+                      recordUserInteraction();
+                      setActiveFilePath(path);
+                      setIsFilesOpen(false);
+                    }}
+                    className={`px-2 py-0.5 rounded-md text-[10px] font-mono whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
+                      isActive
+                        ? "bg-[#1f242c] text-[#f0f6fc] font-medium border border-[#30363d] shadow-2xs"
+                        : "text-[#8b949e] hover:text-[#e6edf3] hover:bg-[#161b22]/70 border border-transparent"
+                    }`}
+                    title={path}
+                  >
+                    {isGeneratingThis && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#79c0ff] animate-ping" />
+                    )}
+                    <span className={isActive ? "text-[#79c0ff]" : "text-[#8b949e]"}>
+                      {fileName}
+                    </span>
+                  </motion.button>
+                );
+              })
+            )}
+          </div>
+
+          <AnimatePresence>
+            {isFilesOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.15 }}
+                className="absolute top-[57px] inset-x-0 bottom-0 z-30 bg-[#111318]/95 backdrop-blur-md border-b border-[#22242a] flex flex-col p-2.5 select-none shadow-2xl"
+              >
+                <div className="flex items-center justify-between pb-2 mb-1.5 border-b border-[#22242a] text-[10.5px]">
+                  <span className="font-semibold text-[#c9d1d9] tracking-tight">
+                    Project Files ({appType === "bitecraft" ? "BiteCraft" : "FlowBoard"})
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setIsFilesOpen(false)}
+                    className="p-1 rounded text-[#8b949e] hover:text-white hover:bg-[#1f242c] transition-colors cursor-pointer"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto space-y-0.5 scrollbar-thin scrollbar-thumb-[#22242a]">
+                  {generatedFiles.length === 0 ? (
+                    <div className="p-4 text-center text-[10.5px] text-[#6e7681]">
+                      No files created yet
+                    </div>
+                  ) : (
+                    activeTree.map((item) => renderMinimalTreeNode(item))
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <div
+            ref={codeEditorRef}
+            className="flex-1 p-2.5 overflow-y-auto overflow-x-auto text-[9.5px] sm:text-[10px] leading-[1.65] font-mono scrollbar-thin scrollbar-thumb-[#22242a] scrollbar-track-transparent select-text"
+          >
+            {generationState === "IDLE" ||
+            generationState === "PROMPT_SUBMITTED" ||
+            generationState === "ANALYZING" ||
+            generatedFiles.length === 0 ? (
+              <div className="flex gap-2 items-baseline pt-0.5 select-none">
+                <span className="w-6 text-right text-[#484f58] select-none text-[8.5px] sm:text-[9px] font-mono pr-1.5 shrink-0">
+                  1
+                </span>
+                <span className="inline-block w-[1.5px] h-3.5 bg-neutral-300 animate-pulse align-middle" />
+              </div>
+            ) : (
+              <>
+                {(() => {
+                  const isCurrentFileBeingGenerated =
+                    generationState === "GENERATING_CODE" &&
+                    activeFilePath === currentGeneratingFile;
+                  const linesToRender = isCurrentFileBeingGenerated
+                    ? activeFileObject.lines.slice(0, generatedCodeLineCount)
+                    : activeFileObject.lines;
+
+                  if (isCurrentFileBeingGenerated && generatedCodeLineCount === 0) {
+                    return (
+                      <div className="flex gap-2 items-baseline px-2 py-0.2 bg-[#1f242c] border-l-2 border-[#79c0ff]">
+                        <span className="w-6 text-right text-[#79c0ff] select-none text-[8.5px] sm:text-[9px] font-mono pr-1.5 shrink-0">
+                          1
+                        </span>
+                        <span className="inline-block w-[1.5px] h-3.5 bg-[#79c0ff] animate-pulse align-middle" />
+                      </div>
+                    );
+                  }
+
+                  return linesToRender.map((line, idx) => {
+                    const isCurrentTypingLine =
+                      isCurrentFileBeingGenerated &&
+                      idx === generatedCodeLineCount - 1;
+                    return (
+                      <div
+                        key={idx}
+                        className={`flex gap-2 items-baseline px-2 py-0.2 rounded-xs transition-colors ${
+                          isCurrentTypingLine
+                            ? "bg-[#1f242c] border-l-2 border-[#79c0ff]"
+                            : "hover:bg-[#161b22]/70"
+                        }`}
+                      >
+                        <span
+                          className={`w-6 text-right select-none text-[8.5px] sm:text-[9px] font-mono pr-1.5 shrink-0 ${
+                            isCurrentTypingLine
+                              ? "text-[#79c0ff] font-semibold"
+                              : "text-[#484f58]"
+                          }`}
+                        >
+                          {idx + 1}
+                        </span>
+                        <div className="flex-1 whitespace-pre flex items-center">
+                          {renderSyntaxHighlight(line)}
+                          {isCurrentTypingLine && (
+                            <span className="inline-block w-[1.5px] h-3.5 bg-[#79c0ff] animate-pulse align-middle ml-0.5" />
+                          )}
+                        </div>
+                      </div>
+                    );
+                  });
+                })()}
+              </>
+            )}
           </div>
         </div>
       </div>

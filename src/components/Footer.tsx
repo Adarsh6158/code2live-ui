@@ -6,32 +6,28 @@ import { Globe } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="w-full max-w-7xl xl:max-w-[1400px] 2xl:max-w-[1520px] mx-auto px-4 sm:px-6 lg:px-8 border-t border-slate-200/80 py-2.5 sm:py-3 flex flex-col md:flex-row gap-2.5 sm:gap-4 items-center justify-between text-xs text-slate-500">
-      {/* Left: Copyright & Website Name */}
-      <div className="flex items-center gap-2 text-[12.5px] font-medium tracking-wide text-slate-600">
-        <span className="font-semibold text-slate-800">
+    <footer className="w-full max-w-7xl xl:max-w-[1400px] 2xl:max-w-[1520px] mx-auto px-4 sm:px-6 lg:px-8 border-t border-[#e5e5e5] py-2.5 sm:py-3 flex flex-col md:flex-row gap-2.5 sm:gap-4 items-center justify-between text-xs text-[#737373]">
+      <div className="flex items-center gap-2 text-xs font-medium tracking-normal text-[#737373]">
+        <span className="font-semibold text-[#171717]">
           &copy; 2026 ADARSH KUMAR
         </span>
-        <span className="text-slate-300 font-light select-none">&bull;</span>
+        <span className="text-[#e5e5e5] font-light select-none">&bull;</span>
         <a
           href="https://adarshcodes.com"
           target="_blank"
           rel="noopener noreferrer"
-          className="group inline-flex items-center gap-1 text-slate-600 hover:text-blue-600 transition-colors"
+          className="group inline-flex items-center gap-1 text-[#737373] hover:text-[#171717] transition-colors"
         >
-          <Globe className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-600 transition-colors shrink-0" />
+          <Globe className="w-3.5 h-3.5 text-[#a3a3a3] group-hover:text-[#171717] transition-colors shrink-0" />
           <span>adarshcodes.com</span>
         </a>
       </div>
 
-      {/* Center: Motto (Exact from PersonalPortfolio) */}
-      <div className="font-mono text-[10.5px] font-semibold text-slate-400 uppercase tracking-[0.12em] order-3 md:order-2 select-none text-center">
+      <div className="font-sans text-[11px] font-medium text-[#a3a3a3] uppercase tracking-[0.12em] order-3 md:order-2 select-none text-center">
         Always learning. Always building.
       </div>
 
-      {/* Right: Exact Social Icons from PersonalPortfolio */}
       <div className="flex items-center gap-5 order-2 md:order-3">
-        {/* GitHub */}
         <a
           href="https://github.com/Adarsh6158"
           target="_blank"
@@ -49,7 +45,6 @@ export function Footer() {
           />
         </a>
 
-        {/* LinkedIn */}
         <a
           href="https://linkedin.com/in/adarshmall"
           target="_blank"
@@ -67,7 +62,6 @@ export function Footer() {
           />
         </a>
 
-        {/* LeetCode */}
         <a
           href="https://leetcode.com/u/AdarshMall/"
           target="_blank"
@@ -85,7 +79,6 @@ export function Footer() {
           />
         </a>
 
-        {/* Medium */}
         <a
           href="https://medium.com/@adarshkumar11"
           target="_blank"
@@ -103,7 +96,6 @@ export function Footer() {
           />
         </a>
 
-        {/* Gmail */}
         <a
           href="mailto:adarshk.swe@gmail.com"
           target="_blank"
