@@ -288,7 +288,7 @@ export function CodeToLivePreview({
 
   const [appType, setAppType] = useState<AppType>(getInitialApp);
   const [generationState, setGenerationState] = useState<GenerationState>("IDLE");
-  const [mobileTab, setMobileTab] = useState<"chat" | "preview" | "code">("preview");
+  const [mobileTab, setMobileTab] = useState<"chat" | "preview" | "code">("chat");
 
   const [typedUserPrompt, setTypedUserPrompt] = useState("");
   const [typedAiResponse, setTypedAiResponse] = useState("");
@@ -397,6 +397,7 @@ export function CodeToLivePreview({
         onAppChange(targetApp);
       }
       setGenerationState("PROMPT_SUBMITTED");
+      setMobileTab("chat");
       setTypedUserPrompt("");
       setTypedAiResponse("");
       setGeneratedFiles([]);
@@ -443,6 +444,7 @@ export function CodeToLivePreview({
 
                 addTimeout(() => {
                   setGenerationState("GENERATING_CODE");
+                  setMobileTab("preview");
                   const sequence =
                     targetApp === "bitecraft"
                       ? BITECRAFT_GENERATION_SEQUENCE
@@ -463,6 +465,7 @@ export function CodeToLivePreview({
 
                           addTimeout(() => {
                             setGenerationState("PREVIEW_VISIBLE");
+                            setMobileTab("preview");
                             completedCountRef.current += 1;
                             if (onReplayComplete) onReplayComplete();
                           }, 800);
@@ -710,21 +713,30 @@ export function CodeToLivePreview({
         </div>
         <div className="flex bg-[#f0f0f0] p-0.5 rounded-lg border border-[#e5e5e5] text-[10px] font-sans">
           <button
-            onClick={() => setMobileTab("chat")}
+            onClick={() => {
+              recordUserInteraction();
+              setMobileTab("chat");
+            }}
             className={`px-2.5 py-0.5 rounded-md transition-all cursor-pointer ${mobileTab === "chat" ? "bg-white text-[#171717] font-medium shadow-2xs" : "text-[#737373]"
               }`}
           >
             Chat
           </button>
           <button
-            onClick={() => setMobileTab("preview")}
+            onClick={() => {
+              recordUserInteraction();
+              setMobileTab("preview");
+            }}
             className={`px-2.5 py-0.5 rounded-md transition-all cursor-pointer ${mobileTab === "preview" ? "bg-white text-[#171717] font-medium shadow-2xs" : "text-[#737373]"
               }`}
           >
             Preview
           </button>
           <button
-            onClick={() => setMobileTab("code")}
+            onClick={() => {
+              recordUserInteraction();
+              setMobileTab("code");
+            }}
             className={`px-2.5 py-0.5 rounded-md transition-all cursor-pointer ${mobileTab === "code" ? "bg-white text-[#171717] font-medium shadow-2xs" : "text-[#737373]"
               }`}
           >
