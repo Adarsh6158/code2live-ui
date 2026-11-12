@@ -38,9 +38,9 @@ export function BrowserFrame({
   return (
     <div
       aria-label={title || "Browser Preview"}
-      className={`group/browser relative flex flex-col w-full rounded-2xl overflow-hidden bg-white border border-[#e5e5e5] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset,0_2px_12px_rgba(0,0,0,0.03)] transition-all duration-200 ${className}`}
+      className={`group/browser relative flex flex-col w-full rounded-2xl sm:rounded-3xl overflow-hidden bg-[#FAF4EF] border border-[#E2D4C8] shadow-[0_1px_0_rgba(255,255,255,0.95)_inset,0_2px_4px_rgba(46,22,12,0.02),0_12px_28px_-6px_rgba(46,22,12,0.07),0_32px_64px_-12px_rgba(46,22,12,0.11)] transition-all duration-200 ${className}`}
     >
-      <div className="h-9 bg-[#fafafa] border-b border-[#e5e5e5] px-3 sm:px-4 flex items-center justify-between gap-1.5 sm:gap-3 select-none">
+      <div className="h-9 bg-[#F3EBE3] border-b border-[#E2D4C8] px-3 sm:px-4 flex items-center justify-between gap-1.5 sm:gap-3 select-none">
         <div className="flex items-center gap-1.5 shrink-0">
           <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f56]/90 border border-[#e0443e]/40 inline-block" />
           <span className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]/90 border border-[#dea123]/40 inline-block" />
@@ -48,9 +48,9 @@ export function BrowserFrame({
         </div>
 
         <div className="flex items-center justify-center flex-1 max-w-lg mx-auto min-w-0 px-1">
-          <div className="flex items-center justify-center gap-1.5 w-full py-0.5 px-2.5 sm:px-3 bg-white rounded-lg border border-[#e5e5e5] text-[#171717] shadow-[0_1px_0_rgba(255,255,255,0.85)_inset,0_1px_2px_rgba(0,0,0,0.02)] text-[10px] sm:text-[11px] font-mono font-medium truncate">
-            <Lock className="w-3 h-3 text-[#737373] shrink-0" />
-            <span className="truncate text-[#171717]">{url}</span>
+          <div className="flex items-center justify-center gap-1.5 w-full py-0.5 px-2.5 sm:px-3 bg-[#FAF4EF] rounded-lg border border-[#E2D4C8] text-[#2E160C] shadow-[0_1px_0_rgba(255,255,255,0.85)_inset,0_1px_2px_rgba(46,22,12,0.02)] text-[10px] sm:text-[11px] font-mono font-medium truncate">
+            <Lock className="w-3 h-3 text-[#6E503F] shrink-0" />
+            <span className="truncate text-[#2E160C]">{url}</span>
           </div>
         </div>
 
@@ -62,10 +62,10 @@ export function BrowserFrame({
               disabled={isReplaying}
               title="Replay simulation walkthrough (Press R)"
               aria-label="Replay simulation walkthrough (Press R)"
-              className="inline-flex items-center gap-1 p-1.5 rounded-lg text-[#737373] hover:text-[#171717] hover:bg-[#f0f0f0] transition-colors focus-visible:outline-2 focus-visible:outline-[#171717] disabled:opacity-40 cursor-pointer"
+              className="inline-flex items-center gap-1 p-1.5 rounded-lg text-[#6E503F] hover:text-[#2E160C] hover:bg-[#EDE3DA] transition-colors focus-visible:outline-2 focus-visible:outline-[#2E160C] disabled:opacity-40 cursor-pointer"
             >
-              <RotateCw className={`w-3.5 h-3.5 ${isReplaying ? "animate-spin text-[#171717]" : ""}`} />
-              <kbd className="hidden sm:inline text-[9px] font-sans font-medium text-[#737373] bg-white border border-[#e5e5e5] px-1 py-0.2 rounded shadow-2xs leading-none">
+              <RotateCw className={`w-3.5 h-3.5 ${isReplaying ? "animate-spin text-[#2E6BFF]" : ""}`} />
+              <kbd className="hidden sm:inline text-[9px] font-sans font-medium text-[#6E503F] bg-[#FAF4EF] border border-[#E2D4C8] px-1 py-0.2 rounded shadow-2xs leading-none">
                 R
               </kbd>
             </button>
@@ -78,7 +78,7 @@ export function BrowserFrame({
               rel="noopener noreferrer"
               title="Open live deployment in new tab"
               aria-label="Open live deployment in new tab"
-              className="p-1.5 rounded-lg text-[#737373] hover:text-[#171717] hover:bg-[#f0f0f0] transition-colors focus-visible:outline-2 focus-visible:outline-[#171717]"
+              className="p-1.5 rounded-lg text-[#6E503F] hover:text-[#2E160C] hover:bg-[#EDE3DA] transition-colors focus-visible:outline-2 focus-visible:outline-[#2E160C]"
             >
               <ExternalLink className="w-3.5 h-3.5" />
             </a>

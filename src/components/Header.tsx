@@ -10,14 +10,14 @@ export function Header() {
   const githubUrl = "https://github.com/Adarsh6158/AI-Code-Generation-Platform";
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-white/90 backdrop-blur-md border-b border-[#e5e5e5] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]">
+    <header className="sticky top-0 z-40 w-full bg-[#F4EBE3]/90 backdrop-blur-md border-b border-[#E2D4C8] shadow-[0_1px_0_rgba(255,255,255,0.8)_inset]">
       <div className="max-w-7xl xl:max-w-[1400px] 2xl:max-w-[1520px] mx-auto px-4 sm:px-6 lg:px-8 h-13 flex items-center justify-between gap-4">
         <Link
           href="/"
-          className="flex items-center text-sm sm:text-base md:text-lg lg:text-[19px] font-bold text-[#171717] tracking-tight hover:opacity-90 transition-opacity truncate shrink-0"
+          className="flex items-center text-sm sm:text-base md:text-lg lg:text-[19px] font-bold text-[#2E160C] tracking-tight hover:opacity-90 transition-opacity truncate shrink-0"
         >
           <span>Turn your ideas into&nbsp;</span>
-          <span className="text-blue-600">real applications.</span>
+          <span className="text-[#2E6BFF]">real applications.</span>
         </Link>
 
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
@@ -27,10 +27,10 @@ export function Header() {
             rel="noopener noreferrer"
             title="Portfolio"
             aria-label="Portfolio"
-            className="group inline-flex items-center gap-1.5 h-8 px-3 rounded-xl text-xs font-medium text-[#737373] hover:text-[#171717] bg-white border border-[#e5e5e5] hover:border-[#d4d4d8] shadow-2xs transition-all duration-150 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-[#171717]"
+            className="group inline-flex items-center gap-1.5 h-8 px-3 rounded-xl text-xs font-medium text-[#6E503F] hover:text-[#2E160C] bg-[#FAF4EF] border border-[#E2D4C8] hover:border-[#2E6BFF]/50 shadow-2xs transition-all duration-150 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-[#2E160C]"
           >
             <span className="hidden sm:inline">Portfolio</span>
-            <ArrowUpRight className="w-3.5 h-3.5 text-[#a3a3a3] group-hover:text-[#171717] transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            <ArrowUpRight className="w-3.5 h-3.5 text-[#9B7D6E] group-hover:text-[#2E6BFF] transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </a>
 
           <a
@@ -39,7 +39,7 @@ export function Header() {
             rel="noopener noreferrer"
             title="GitHub Repository"
             aria-label="GitHub Repository"
-            className="group inline-flex items-center gap-1.5 h-8 px-3 rounded-xl text-xs font-medium text-[#171717] bg-white hover:bg-[#fafafa] border border-[#e5e5e5] hover:border-[#d4d4d8] shadow-2xs transition-all duration-150 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-[#171717]"
+            className="group inline-flex items-center gap-1.5 h-8 px-3 rounded-xl text-xs font-medium text-[#2E160C] bg-[#FAF4EF] hover:bg-[#F3EBE3] border border-[#E2D4C8] hover:border-[#2E6BFF]/50 shadow-2xs transition-all duration-150 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-[#2E160C]"
           >
             <Image
               src="/Github.svg"
@@ -49,7 +49,7 @@ export function Header() {
               className="w-3.5 h-3.5 object-contain"
             />
             <span className="hidden sm:inline">GitHub</span>
-            <ArrowUpRight className="w-3.5 h-3.5 text-[#a3a3a3] group-hover:text-[#171717] transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            <ArrowUpRight className="w-3.5 h-3.5 text-[#9B7D6E] group-hover:text-[#2E6BFF] transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </a>
         </div>
       </div>

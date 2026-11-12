@@ -6,24 +6,24 @@ import { Globe } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="w-full max-w-7xl xl:max-w-[1400px] 2xl:max-w-[1520px] mx-auto px-4 sm:px-6 lg:px-8 border-t border-[#e5e5e5] py-2.5 sm:py-3 flex flex-col md:flex-row gap-2.5 sm:gap-4 items-center justify-between text-xs text-[#737373]">
-      <div className="flex items-center gap-2 text-xs font-medium tracking-normal text-[#737373]">
-        <span className="font-semibold text-[#171717]">
+    <footer className="w-full max-w-7xl xl:max-w-[1400px] 2xl:max-w-[1520px] mx-auto px-4 sm:px-6 lg:px-8 border-t border-[#E2D4C8] py-2.5 sm:py-3 flex flex-col md:flex-row gap-2.5 sm:gap-4 items-center justify-between text-xs text-[#6E503F]">
+      <div className="flex items-center gap-2 text-xs font-medium tracking-normal text-[#6E503F]">
+        <span className="font-semibold text-[#2E160C]">
           &copy; 2026 ADARSH KUMAR
         </span>
-        <span className="text-[#e5e5e5] font-light select-none">&bull;</span>
+        <span className="text-[#E2D4C8] font-light select-none">&bull;</span>
         <a
           href="https://adarshcodes.com"
           target="_blank"
           rel="noopener noreferrer"
-          className="group inline-flex items-center gap-1 text-[#737373] hover:text-[#171717] transition-colors"
+          className="group inline-flex items-center gap-1 text-[#6E503F] hover:text-[#2E6BFF] transition-colors"
         >
-          <Globe className="w-3.5 h-3.5 text-[#a3a3a3] group-hover:text-[#171717] transition-colors shrink-0" />
+          <Globe className="w-3.5 h-3.5 text-[#9B7D6E] group-hover:text-[#2E6BFF] transition-colors shrink-0" />
           <span>adarshcodes.com</span>
         </a>
       </div>
 
-      <div className="font-sans text-[11px] font-medium text-[#a3a3a3] uppercase tracking-[0.12em] order-3 md:order-2 select-none text-center">
+      <div className="font-sans text-[11px] font-medium text-[#9B7D6E] uppercase tracking-[0.12em] order-3 md:order-2 select-none text-center">
         Always learning. Always building.
       </div>
 

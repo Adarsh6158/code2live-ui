@@ -15,7 +15,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const viewport: Viewport = {
-  themeColor: "#171717",
+  themeColor: "#F4EBE3",
   colorScheme: "light",
   width: "device-width",
   initialScale: 1,
@@ -176,7 +176,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
       </head>
-      <body className="min-h-full flex flex-col bg-[#fafafa] text-[#171717] font-sans">
+      <body className="min-h-full flex flex-col bg-[#F4EBE3] text-[#2E160C] font-sans">
         {children}
       </body>
     </html>

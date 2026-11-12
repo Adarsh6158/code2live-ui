@@ -29,54 +29,58 @@ export function ProjectCard({ project, initialApp = "bitecraft" }: ProjectCardPr
   const frameTitle = `AI-Powered Application Builder — Code2Live Live Preview (${currentApp === "bitecraft" ? "BiteCraft Food Delivery" : "FlowBoard Kanban"})`;
 
   return (
-    <article
-      aria-label="Code2Live AI Application Platform"
-      className="group flex flex-col bg-white rounded-3xl border border-[#e5e5e5] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset,0_2px_8px_rgba(0,0,0,0.02)] hover:border-[#d4d4d8] hover:shadow-[0_1px_0_rgba(255,255,255,0.9)_inset,0_8px_24px_rgba(0,0,0,0.04)] transition-all duration-200 p-3.5 sm:p-5"
-    >
-      <div className="pb-1 max-w-3xl">
-        <p className="text-xs sm:text-[13px] text-[#737373] leading-relaxed">
-          Describe what you want to build. Watch AI transform your ideas into functional applications.
-        </p>
-      </div>
+    <div className="flex flex-col items-center w-full">
+      <article
+        aria-label="Code2Live AI Application Platform"
+        className="w-full group flex flex-col bg-[#FAF4EF] rounded-3xl border border-[#E2D4C8] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset,0_2px_8px_rgba(46,22,12,0.03)] p-3.5 sm:p-5"
+      >
+        <div className="pb-2 max-w-3xl">
+          <p className="text-xs sm:text-[13px] text-[#6E503F] leading-relaxed">
+            Describe what you want to build. Watch AI transform your ideas into functional applications.
+          </p>
+        </div>
 
-      <div className="my-2 sm:my-2.5">
-        <BrowserFrame
-          url={frameUrl}
-          title={frameTitle}
-          onReplay={handleReplay}
-          isReplaying={isReplaying}
-          externalLink={`/${activeSlug}`}
-        >
-          <CodeToLivePreview
+        <div className="w-full relative">
+          <BrowserFrame
+            url={frameUrl}
+            title={frameTitle}
+            onReplay={handleReplay}
             isReplaying={isReplaying}
-            onReplayComplete={handleReplayComplete}
-            initialApp={initialApp}
-            onAppChange={setCurrentApp}
-          />
-        </BrowserFrame>
-      </div>
+            externalLink={`/${activeSlug}`}
+          >
+            <CodeToLivePreview
+              isReplaying={isReplaying}
+              onReplayComplete={handleReplayComplete}
+              initialApp={initialApp}
+              onAppChange={setCurrentApp}
+            />
+          </BrowserFrame>
+        </div>
+      </article>
 
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 sm:gap-4 pt-2.5 sm:pt-3 border-t border-[#e5e5e5]">
-        <a
-          href={project.architectureUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="order-2 sm:order-1 group/btn inline-flex items-center justify-center gap-2 h-10 sm:h-11 px-5 sm:px-7 rounded-xl border border-[#e5e5e5] bg-white hover:bg-[#fafafa] hover:border-[#d4d4d8] text-[#737373] hover:text-[#171717] text-xs sm:text-sm font-medium shadow-2xs transition-all duration-150 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-[#171717] w-full sm:w-auto cursor-pointer"
-        >
-          <Layers className="w-4 h-4 text-[#737373] group-hover/btn:text-[#171717] transition-colors" />
-          <span>Explore Architecture</span>
-          <ArrowUpRight className="w-4 h-4 text-[#a3a3a3] group-hover/btn:text-[#171717] transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
-        </a>
+      <div className="flex items-center justify-center pt-4 sm:pt-5">
+        <div className="inline-flex items-center gap-2 sm:gap-3 p-1.5 rounded-2xl bg-[#FAF4EF]/95 backdrop-blur-md border border-[#E2D4C8] shadow-[0_8px_30px_rgba(46,22,12,0.08)] select-none">
+          <a
+            href={project.architectureUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group/btn inline-flex items-center justify-center gap-2 h-9 sm:h-10 px-4 sm:px-6 rounded-xl border border-[#E2D4C8] bg-[#FAF4EF] hover:bg-[#EDE3DA] hover:border-[#C4B1A0] text-[#6E503F] hover:text-[#2E160C] text-xs sm:text-sm font-medium transition-all duration-150 active:scale-[0.98] cursor-pointer"
+          >
+            <Layers className="w-4 h-4 text-[#6E503F] group-hover/btn:text-[#2E160C] transition-colors" />
+            <span>Explore Architecture</span>
+            <ArrowUpRight className="w-3.5 h-3.5 text-[#9B7D6E] group-hover/btn:text-[#2E160C] transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
+          </a>
 
-        <Link
-          href="/demo/code-to-live"
-          className="order-1 sm:order-2 group/btn inline-flex items-center justify-center gap-2 h-10 sm:h-11 px-6 sm:px-8 rounded-xl bg-[#171717] hover:bg-[#303030] active:bg-[#404040] text-white text-xs sm:text-sm font-medium shadow-2xs transition-colors duration-150 ease-in-out active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-[#171717] w-full sm:w-auto cursor-pointer"
-        >
-          <Play className="w-3.5 h-3.5 fill-current text-white" />
-          <span>Try Demo</span>
-          <ArrowRight className="w-4 h-4 text-white/80 group-hover/btn:text-white transition-transform group-hover/btn:translate-x-0.5" />
-        </Link>
+          <Link
+            href="/demo/code-to-live"
+            className="group/btn inline-flex items-center justify-center gap-2 h-9 sm:h-10 px-5 sm:px-7 rounded-xl bg-[#2E6BFF] hover:bg-[#2057DF] active:bg-[#1A4BCC] text-white text-xs sm:text-sm font-semibold shadow-[0_4px_16px_rgba(46,107,255,0.32)] transition-all duration-150 active:scale-[0.98] cursor-pointer"
+          >
+            <Play className="w-3.5 h-3.5 fill-current text-white" />
+            <span>Try Demo</span>
+            <ArrowRight className="w-3.5 h-3.5 text-white/80 group-hover/btn:text-white transition-transform group-hover/btn:translate-x-0.5" />
+          </Link>
+        </div>
       </div>
-    </article>
+    </div>
   );
 }

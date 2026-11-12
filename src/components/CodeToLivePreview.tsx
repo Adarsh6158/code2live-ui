@@ -31,6 +31,8 @@ import {
   Circle,
   CircleDot,
   Filter,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -201,9 +203,13 @@ const FLOWBOARD_INITIAL_TASKS: KanbanTask[] = [
   },
 ];
 
-function renderSyntaxHighlight(line: string) {
+function renderSyntaxHighlight(line: string, isLight = true) {
   if (line.trim().startsWith("//") || line.trim().startsWith("/*")) {
-    return <span className="text-[#6e7681] italic">{line}</span>;
+    return (
+      <span className={`${isLight ? "text-[#9B7D6E]" : "text-[#7A6456]"} italic`}>
+        {line}
+      </span>
+    );
   }
   const tokenRegex =
     /(".*?"|'.*?'|`.*?`|\b(?:import|export|default|from|function|return|const|let|var|if|else|switch|case|break)\b|<\/?[A-Za-z0-9_.-]+|\b(?:true|false|null|undefined|\d+)\b|[{}()[\].,;:])/g;
@@ -219,7 +225,10 @@ function renderSyntaxHighlight(line: string) {
     const token = match[0];
     if (token.startsWith('"') || token.startsWith("'") || token.startsWith("`")) {
       parts.push(
-        <span key={match.index} className="text-[#a5d6ff]">
+        <span
+          key={match.index}
+          className={isLight ? "text-[#0F766E]" : "text-[#a5d6ff]"}
+        >
           {token}
         </span>
       );
@@ -227,31 +236,46 @@ function renderSyntaxHighlight(line: string) {
       /^(?:import|export|default|from|return|function)$/.test(token)
     ) {
       parts.push(
-        <span key={match.index} className="text-[#ff7b72] font-medium">
+        <span
+          key={match.index}
+          className={`${isLight ? "text-[#C2410C]" : "text-[#ff7b72]"} font-medium`}
+        >
           {token}
         </span>
       );
     } else if (/^(?:const|let|var)$/.test(token)) {
       parts.push(
-        <span key={match.index} className="text-[#79c0ff]">
+        <span
+          key={match.index}
+          className="text-[#2E6BFF] font-medium"
+        >
           {token}
         </span>
       );
     } else if (/^(?:true|false|null|undefined|\d+)$/.test(token)) {
       parts.push(
-        <span key={match.index} className="text-[#d2a8ff]">
+        <span
+          key={match.index}
+          className={isLight ? "text-[#7C3AED]" : "text-[#d2a8ff]"}
+        >
           {token}
         </span>
       );
     } else if (token.startsWith("<")) {
       parts.push(
-        <span key={match.index} className="text-[#7ee787]">
+        <span
+          key={match.index}
+          className={isLight ? "text-[#1D4ED8] font-medium" : "text-[#7ee787]"}
+        >
           {token}
         </span>
       );
     } else {
       parts.push(
-        <span key={match.index} className="text-[#8b949e]">
+        <span
+          key={match.index}
+          className={isLight ? "text-[#2E160C]" : "text-[#A69385]"}
+        >
           {token}
         </span>
       );
@@ -264,7 +288,7 @@ function renderSyntaxHighlight(line: string) {
   }
 
   return (
-    <span className="text-[#e6edf3]">
+    <span className={isLight ? "text-[#2E160C]" : "text-[#e8ded6]"}>
       {parts.length > 0 ? parts : line}
     </span>
   );
@@ -305,6 +329,7 @@ export function CodeToLivePreview({
     "src/styles": false,
   });
   const [generatedCodeLineCount, setGeneratedCodeLineCount] = useState<number>(0);
+  const [ideTheme, setIdeTheme] = useState<"light" | "dark">("light");
 
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -650,6 +675,7 @@ export function CodeToLivePreview({
     if (!isFileOrFolderVisible(node)) {
       return null;
     }
+    const isLight = ideTheme === "light";
     if (node.isFolder) {
       const isOpen = expandedFolders[node.path] ?? true;
       return (
@@ -658,16 +684,23 @@ export function CodeToLivePreview({
             type="button"
             onClick={() => toggleFolder(node.path)}
             style={{ paddingLeft: `${depth * 10 + 6}px` }}
-            className="w-full flex items-center gap-1.5 py-1 text-[11px] text-[#8b949e] hover:text-[#f0f6fc] hover:bg-[#1f242c]/70 rounded-md transition-colors text-left font-sans cursor-pointer group"
+            className={`w-full flex items-center gap-1.5 py-1 text-[11px] rounded-md transition-colors text-left font-sans cursor-pointer group ${
+              isLight
+                ? "text-[#6E503F] hover:text-[#2E160C] hover:bg-[#EDE3DA]/70"
+                : "text-[#A69385] hover:text-[#FAF4EF] hover:bg-[#34271E]/70"
+            }`}
           >
             <ChevronRight
-              className={`w-3 h-3 text-[#6e7681] group-hover:text-[#c9d1d9] transition-transform duration-150 ${isOpen ? "rotate-90" : ""
-                }`}
+              className={`w-3 h-3 transition-transform duration-150 ${
+                isLight
+                  ? "text-[#9B7D6E] group-hover:text-[#2E160C]"
+                  : "text-[#7A6456] group-hover:text-[#E8DED6]"
+              } ${isOpen ? "rotate-90" : ""}`}
             />
             {isOpen ? (
-              <FolderOpen className="w-3.5 h-3.5 text-[#79c0ff]" />
+              <FolderOpen className="w-3.5 h-3.5 text-[#2E6BFF]" />
             ) : (
-              <Folder className="w-3.5 h-3.5 text-[#79c0ff]" />
+              <Folder className="w-3.5 h-3.5 text-[#2E6BFF]" />
             )}
             <span className="truncate">{node.name}</span>
           </button>
@@ -689,35 +722,48 @@ export function CodeToLivePreview({
           setIsFilesOpen(false);
         }}
         style={{ paddingLeft: `${depth * 10 + 20}px` }}
-        className={`w-full flex items-center justify-between py-1 px-2 text-[11px] font-mono rounded-md text-left transition-colors cursor-pointer truncate ${isActive
-          ? "bg-[#1f242c] text-[#79c0ff] font-medium"
-          : "text-[#c9d1d9] hover:bg-[#161b22] hover:text-white"
-          }`}
+        className={`w-full flex items-center justify-between py-1 px-2 text-[11px] font-mono rounded-md text-left transition-colors cursor-pointer truncate ${
+          isActive
+            ? isLight
+              ? "bg-[#EDE3DA] text-[#2E6BFF] font-semibold"
+              : "bg-[#34271E] text-[#2E6BFF] font-medium"
+            : isLight
+            ? "text-[#6E503F] hover:bg-[#EDE3DA]/50 hover:text-[#2E160C]"
+            : "text-[#C7B5A8] hover:bg-[#2C2018] hover:text-[#FAF4EF]"
+        }`}
       >
         <div className="flex items-center gap-1.5 truncate">
-          <FileCode className={`w-3 h-3 ${isActive ? "text-[#79c0ff]" : "text-[#6e7681]"}`} />
+          <FileCode
+            className={`w-3 h-3 ${
+              isActive
+                ? "text-[#2E6BFF]"
+                : isLight
+                ? "text-[#9B7D6E]"
+                : "text-[#7A6456]"
+            }`}
+          />
           <span className="truncate">{node.name}</span>
         </div>
-        {isActive && <span className="w-1.5 h-1.5 rounded-full bg-[#79c0ff] shrink-0" />}
+        {isActive && <span className="w-1.5 h-1.5 rounded-full bg-[#2E6BFF] shrink-0" />}
       </button>
     );
   };
 
   return (
-    <div className="flex flex-col h-[450px] sm:h-[475px] md:h-[500px] w-full bg-white text-[#171717] select-none overflow-hidden font-sans border-t border-[#e5e5e5]">
+    <div className="flex flex-col h-[450px] sm:h-[475px] md:h-[500px] w-full bg-[#FAF4EF] text-[#2E160C] select-none overflow-hidden font-sans border-t border-[#E2D4C8]">
 
-      <div className="flex lg:hidden h-8 px-3 bg-[#fafafa] border-b border-[#e5e5e5] items-center justify-between text-xs shrink-0">
-        <div className="flex items-center gap-1.5 text-[10px] font-medium text-[#737373]">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#171717]" />
+      <div className="flex lg:hidden h-8 px-3 bg-[#F3EBE3] border-b border-[#E2D4C8] items-center justify-between text-xs shrink-0">
+        <div className="flex items-center gap-1.5 text-[10px] font-medium text-[#6E503F]">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#2E6BFF]" />
           <span>{appType === "bitecraft" ? "BiteCraft App" : "FlowBoard App"}</span>
         </div>
-        <div className="flex bg-[#f0f0f0] p-0.5 rounded-lg border border-[#e5e5e5] text-[10px] font-sans">
+        <div className="flex bg-[#EDE3DA] p-0.5 rounded-lg border border-[#E2D4C8] text-[10px] font-sans">
           <button
             onClick={() => {
               recordUserInteraction();
               setMobileTab("chat");
             }}
-            className={`px-2.5 py-0.5 rounded-md transition-all cursor-pointer ${mobileTab === "chat" ? "bg-white text-[#171717] font-medium shadow-2xs" : "text-[#737373]"
+            className={`px-2.5 py-0.5 rounded-md transition-all cursor-pointer ${mobileTab === "chat" ? "bg-[#FAF4EF] text-[#2E160C] font-semibold shadow-2xs" : "text-[#6E503F]"
               }`}
           >
             Chat
@@ -727,7 +773,7 @@ export function CodeToLivePreview({
               recordUserInteraction();
               setMobileTab("preview");
             }}
-            className={`px-2.5 py-0.5 rounded-md transition-all cursor-pointer ${mobileTab === "preview" ? "bg-white text-[#171717] font-medium shadow-2xs" : "text-[#737373]"
+            className={`px-2.5 py-0.5 rounded-md transition-all cursor-pointer ${mobileTab === "preview" ? "bg-[#FAF4EF] text-[#2E160C] font-semibold shadow-2xs" : "text-[#6E503F]"
               }`}
           >
             Preview
@@ -737,7 +783,7 @@ export function CodeToLivePreview({
               recordUserInteraction();
               setMobileTab("code");
             }}
-            className={`px-2.5 py-0.5 rounded-md transition-all cursor-pointer ${mobileTab === "code" ? "bg-white text-[#171717] font-medium shadow-2xs" : "text-[#737373]"
+            className={`px-2.5 py-0.5 rounded-md transition-all cursor-pointer ${mobileTab === "code" ? "bg-[#FAF4EF] text-[#2E160C] font-semibold shadow-2xs" : "text-[#6E503F]"
               }`}
           >
             Code
@@ -768,7 +814,7 @@ export function CodeToLivePreview({
               <button
                 type="button"
                 onClick={() => startLifecycle("bitecraft")}
-                className={`px-1.5 py-0.5 rounded-md transition-colors ${appType === "bitecraft" ? "bg-white text-[#171717] font-semibold shadow-2xs" : "text-[#737373]"
+                className={`px-1.5 py-0.5 rounded-md transition-colors cursor-pointer ${appType === "bitecraft" ? "bg-white text-[#171717] font-semibold shadow-2xs" : "text-[#737373] hover:text-[#171717]"
                   }`}
                 title="Switch to Food Delivery App"
               >
@@ -777,7 +823,7 @@ export function CodeToLivePreview({
               <button
                 type="button"
                 onClick={() => startLifecycle("flowboard")}
-                className={`px-1.5 py-0.5 rounded-md transition-colors ${appType === "flowboard" ? "bg-white text-[#171717] font-semibold shadow-2xs" : "text-[#737373]"
+                className={`px-1.5 py-0.5 rounded-md transition-colors cursor-pointer ${appType === "flowboard" ? "bg-white text-[#171717] font-semibold shadow-2xs" : "text-[#737373] hover:text-[#171717]"
                   }`}
                 title="Switch to FlowBoard Kanban App"
               >
@@ -786,7 +832,7 @@ export function CodeToLivePreview({
             </div>
           </div>
 
-          <div className="flex-1 p-3 overflow-y-auto space-y-2.5 min-h-0 text-xs">
+          <div className="flex-1 p-3 overflow-y-auto space-y-2.5 min-h-0 text-xs bg-[#fafafa]">
             <motion.div
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
@@ -807,7 +853,7 @@ export function CodeToLivePreview({
                 </span>
                 <span>{typedUserPrompt || "..."}</span>
                 {generationState === "PROMPT_SUBMITTED" && (
-                  <span className="inline-block w-1.5 h-3 ml-1 bg-[#171717] align-middle animate-pulse" />
+                  <span className="inline-block w-1.5 h-3 ml-1 bg-[#2E6BFF] align-middle animate-pulse" />
                 )}
               </div>
             </motion.div>
@@ -837,12 +883,12 @@ export function CodeToLivePreview({
                     />
                     <path
                       d="M8 1.5V8M8 8L14 11.2M8 8L2 11.2"
-                      stroke="#3b82f6"
+                      stroke="#2E6BFF"
                       strokeWidth="1.2"
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     />
-                    <circle cx="8" cy="8" r="1.6" fill="#60a5fa" />
+                    <circle cx="8" cy="8" r="1.6" fill="#2E6BFF" />
                   </svg>
                 </div>
                 <div className="flex-1 p-2.5 rounded-xl bg-white border border-[#e5e5e5] text-[#171717] text-[11px] leading-relaxed shadow-2xs">
@@ -854,21 +900,21 @@ export function CodeToLivePreview({
                   <div className="mt-2.5 pt-2 border-t border-[#f0f0f0] space-y-1.5 font-sans text-[10px]">
                     <div
                       className={`flex items-center gap-1.5 ${generationState === "ANALYZING"
-                        ? "text-[#171717] font-medium"
+                        ? "text-[#171717] font-semibold"
                         : "text-[#52525b]"
                         }`}
                     >
                       {generationState === "ANALYZING" ? (
-                        <div className="w-2.5 h-2.5 border-1.5 border-[#171717] border-t-transparent rounded-full animate-spin shrink-0" />
+                        <div className="w-2.5 h-2.5 border-1.5 border-[#2E6BFF] border-t-transparent rounded-full animate-spin shrink-0" />
                       ) : (
-                        <Check className="w-3 h-3 text-[#171717] stroke-[2.5] shrink-0" />
+                        <Check className="w-3 h-3 text-[#2E6BFF] stroke-[2.5] shrink-0" />
                       )}
                       <span>Understanding your requirements...</span>
                     </div>
 
                     <div
                       className={`flex items-center gap-1.5 ${generationState === "GENERATING_CODE"
-                        ? "text-[#171717] font-medium"
+                        ? "text-[#171717] font-semibold"
                         : generationState === "BUILDING" ||
                           generationState === "READY" ||
                           generationState === "PREVIEW_VISIBLE"
@@ -877,11 +923,11 @@ export function CodeToLivePreview({
                         }`}
                     >
                       {generationState === "GENERATING_CODE" ? (
-                        <div className="w-2.5 h-2.5 border-1.5 border-[#171717] border-t-transparent rounded-full animate-spin shrink-0" />
+                        <div className="w-2.5 h-2.5 border-1.5 border-[#2E6BFF] border-t-transparent rounded-full animate-spin shrink-0" />
                       ) : generationState === "BUILDING" ||
                         generationState === "READY" ||
                         generationState === "PREVIEW_VISIBLE" ? (
-                        <Check className="w-3 h-3 text-[#171717] stroke-[2.5] shrink-0" />
+                        <Check className="w-3 h-3 text-[#2E6BFF] stroke-[2.5] shrink-0" />
                       ) : (
                         <div className="w-3 h-3 rounded-full border border-[#d4d4d8] shrink-0" />
                       )}
@@ -894,7 +940,7 @@ export function CodeToLivePreview({
 
                     <div
                       className={`flex items-center gap-1.5 ${generationState === "BUILDING"
-                        ? "text-[#171717] font-medium"
+                        ? "text-[#171717] font-semibold"
                         : generationState === "READY" ||
                           generationState === "PREVIEW_VISIBLE"
                           ? "text-[#52525b]"
@@ -902,10 +948,10 @@ export function CodeToLivePreview({
                         }`}
                     >
                       {generationState === "BUILDING" ? (
-                        <div className="w-2.5 h-2.5 border-1.5 border-[#171717] border-t-transparent rounded-full animate-spin shrink-0" />
+                        <div className="w-2.5 h-2.5 border-1.5 border-[#2E6BFF] border-t-transparent rounded-full animate-spin shrink-0" />
                       ) : generationState === "READY" ||
                         generationState === "PREVIEW_VISIBLE" ? (
-                        <Check className="w-3 h-3 text-[#171717] stroke-[2.5] shrink-0" />
+                        <Check className="w-3 h-3 text-[#2E6BFF] stroke-[2.5] shrink-0" />
                       ) : (
                         <div className="w-3 h-3 rounded-full border border-[#d4d4d8] shrink-0" />
                       )}
@@ -915,13 +961,13 @@ export function CodeToLivePreview({
                     <div
                       className={`flex items-center gap-1.5 ${generationState === "READY" ||
                         generationState === "PREVIEW_VISIBLE"
-                        ? "text-[#171717] font-medium"
+                        ? "text-[#171717] font-semibold"
                         : "text-[#a3a3a3]"
                         }`}
                     >
                       {generationState === "READY" ||
                         generationState === "PREVIEW_VISIBLE" ? (
-                        <Check className="w-3 h-3 text-[#171717] stroke-[2.5] shrink-0" />
+                        <Check className="w-3 h-3 text-[#2E6BFF] stroke-[2.5] shrink-0" />
                       ) : (
                         <div className="w-3 h-3 rounded-full border border-[#d4d4d8] shrink-0" />
                       )}
@@ -958,85 +1004,85 @@ export function CodeToLivePreview({
 
         <div
           className={`${mobileTab === "preview" ? "flex" : "hidden"
-            } lg:flex lg:w-[52%] flex-col border-r border-[#e5e5e5] min-h-0 relative bg-white`}
+            } lg:flex lg:w-[52%] flex-col border-r border-[#E2D4C8] min-h-0 relative bg-[#FAF4EF]`}
         >
           {generationState !== "PREVIEW_VISIBLE" && (
-            <div className="flex-1 flex flex-col items-center justify-center p-6 text-center bg-[#fafafa] relative overflow-hidden select-none">
+            <div className="flex-1 flex flex-col items-center justify-center p-6 text-center bg-[#F4EBE3] relative overflow-hidden select-none">
               <div className="absolute inset-0 p-4 pointer-events-none select-none opacity-25 flex flex-col gap-3">
                 {appType === "bitecraft" ? (
                   <>
-                    <div className="h-9 w-full rounded-lg bg-neutral-200/70 border border-neutral-300/40 flex items-center justify-between px-3">
-                      <div className="w-16 h-3 rounded bg-neutral-300" />
-                      <div className="w-28 h-4 rounded-md bg-neutral-300/60" />
-                      <div className="w-8 h-4 rounded-md bg-neutral-300/60" />
+                    <div className="h-9 w-full rounded-lg bg-[#EDE3DA] border border-[#E2D4C8] flex items-center justify-between px-3">
+                      <div className="w-16 h-3 rounded bg-[#C4B1A0]" />
+                      <div className="w-28 h-4 rounded-md bg-[#D5C4B5]" />
+                      <div className="w-8 h-4 rounded-md bg-[#D5C4B5]" />
                     </div>
-                    <div className="h-20 w-full rounded-lg bg-neutral-200/50 border border-neutral-300/40 p-3 flex flex-col justify-end gap-1.5">
-                      <div className="w-24 h-3 rounded bg-neutral-300" />
-                      <div className="w-40 h-2 rounded bg-neutral-300/60" />
+                    <div className="h-20 w-full rounded-lg bg-[#EDE3DA] border border-[#E2D4C8] p-3 flex flex-col justify-end gap-1.5">
+                      <div className="w-24 h-3 rounded bg-[#C4B1A0]" />
+                      <div className="w-40 h-2 rounded bg-[#D5C4B5]" />
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 flex-1">
-                      <div className="rounded-lg bg-neutral-200/40 border border-neutral-300/40 p-2 space-y-2">
-                        <div className="h-14 rounded bg-neutral-300/60" />
-                        <div className="w-3/4 h-2 rounded bg-neutral-300" />
-                        <div className="w-1/2 h-2 rounded bg-neutral-300/60" />
+                      <div className="rounded-lg bg-[#EDE3DA] border border-[#E2D4C8] p-2 space-y-2">
+                        <div className="h-14 rounded bg-[#D5C4B5]" />
+                        <div className="w-3/4 h-2 rounded bg-[#C4B1A0]" />
+                        <div className="w-1/2 h-2 rounded bg-[#D5C4B5]" />
                       </div>
-                      <div className="rounded-lg bg-neutral-200/40 border border-neutral-300/40 p-2 space-y-2">
-                        <div className="h-14 rounded bg-neutral-300/60" />
-                        <div className="w-3/4 h-2 rounded bg-neutral-300" />
-                        <div className="w-1/2 h-2 rounded bg-neutral-300/60" />
+                      <div className="rounded-lg bg-[#EDE3DA] border border-[#E2D4C8] p-2 space-y-2">
+                        <div className="h-14 rounded bg-[#D5C4B5]" />
+                        <div className="w-3/4 h-2 rounded bg-[#C4B1A0]" />
+                        <div className="w-1/2 h-2 rounded bg-[#D5C4B5]" />
                       </div>
-                      <div className="hidden sm:block rounded-lg bg-neutral-200/40 border border-neutral-300/40 p-2 space-y-2">
-                        <div className="h-14 rounded bg-neutral-300/60" />
-                        <div className="w-3/4 h-2 rounded bg-neutral-300" />
-                        <div className="w-1/2 h-2 rounded bg-neutral-300/60" />
+                      <div className="hidden sm:block rounded-lg bg-[#EDE3DA] border border-[#E2D4C8] p-2 space-y-2">
+                        <div className="h-14 rounded bg-[#D5C4B5]" />
+                        <div className="w-3/4 h-2 rounded bg-[#C4B1A0]" />
+                        <div className="w-1/2 h-2 rounded bg-[#D5C4B5]" />
                       </div>
                     </div>
                   </>
                 ) : (
                   <>
-                    <div className="h-9 w-full rounded-lg bg-neutral-200/70 border border-neutral-300/40 flex items-center justify-between px-3">
-                      <div className="w-20 h-3 rounded bg-neutral-300" />
-                      <div className="w-32 h-4 rounded-md bg-neutral-300/60" />
-                      <div className="w-12 h-4 rounded-md bg-neutral-300/60" />
+                    <div className="h-9 w-full rounded-lg bg-[#EDE3DA] border border-[#E2D4C8] flex items-center justify-between px-3">
+                      <div className="w-20 h-3 rounded bg-[#C4B1A0]" />
+                      <div className="w-32 h-4 rounded-md bg-[#D5C4B5]" />
+                      <div className="w-12 h-4 rounded-md bg-[#D5C4B5]" />
                     </div>
                     <div className="grid grid-cols-3 gap-2.5 flex-1">
-                      <div className="rounded-lg bg-neutral-200/40 border border-neutral-300/40 p-2 space-y-2">
-                        <div className="w-16 h-3 rounded bg-neutral-300/70" />
-                        <div className="h-12 rounded bg-neutral-300/50" />
-                        <div className="h-12 rounded bg-neutral-300/50" />
+                      <div className="rounded-lg bg-[#EDE3DA] border border-[#E2D4C8] p-2 space-y-2">
+                        <div className="w-16 h-3 rounded bg-[#C4B1A0]" />
+                        <div className="h-12 rounded bg-[#D5C4B5]" />
+                        <div className="h-12 rounded bg-[#D5C4B5]" />
                       </div>
-                      <div className="rounded-lg bg-neutral-200/40 border border-neutral-300/40 p-2 space-y-2">
-                        <div className="w-16 h-3 rounded bg-neutral-300/70" />
-                        <div className="h-12 rounded bg-neutral-300/50" />
-                        <div className="h-12 rounded bg-neutral-300/50" />
+                      <div className="rounded-lg bg-[#EDE3DA] border border-[#E2D4C8] p-2 space-y-2">
+                        <div className="w-16 h-3 rounded bg-[#C4B1A0]" />
+                        <div className="h-12 rounded bg-[#D5C4B5]" />
+                        <div className="h-12 rounded bg-[#D5C4B5]" />
                       </div>
-                      <div className="rounded-lg bg-neutral-200/40 border border-neutral-300/40 p-2 space-y-2">
-                        <div className="w-16 h-3 rounded bg-neutral-300/70" />
-                        <div className="h-12 rounded bg-neutral-300/50" />
-                        <div className="h-12 rounded bg-neutral-300/50" />
+                      <div className="rounded-lg bg-[#EDE3DA] border border-[#E2D4C8] p-2 space-y-2">
+                        <div className="w-16 h-3 rounded bg-[#C4B1A0]" />
+                        <div className="h-12 rounded bg-[#D5C4B5]" />
+                        <div className="h-12 rounded bg-[#D5C4B5]" />
                       </div>
                     </div>
                   </>
                 )}
               </div>
 
-              <div className="relative z-10 px-6 py-5 rounded-xl bg-white/80 backdrop-blur-md border border-neutral-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.03),0_16px_36px_-6px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.95)] flex flex-col items-center justify-center max-w-[280px] w-full space-y-3">
+              <div className="relative z-10 px-6 py-5 rounded-xl bg-[#FAF4EF]/90 backdrop-blur-md border border-[#E2D4C8] shadow-[0_1px_3px_rgba(46,22,12,0.03),0_16px_36px_-6px_rgba(46,22,12,0.06),inset_0_1px_0_rgba(255,255,255,0.95)] flex flex-col items-center justify-center max-w-[280px] w-full space-y-3">
                 {(generationState === "ANALYZING" ||
                   generationState === "GENERATING_CODE" ||
                   generationState === "BUILDING") && (
                     <>
-                      <div className="w-4 h-4 border-[1.5px] border-neutral-200 border-t-neutral-900 rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-[1.5px] border-[#E2D4C8] border-t-[#2E6BFF] rounded-full animate-spin" />
                       <div className="space-y-1">
-                        <p className="text-[12px] font-semibold text-neutral-900 tracking-tight">Building your application</p>
-                        <p className="text-[11px] text-neutral-500 font-sans">
+                        <p className="text-[12px] font-semibold text-[#2E160C] tracking-tight">Building your application</p>
+                        <p className="text-[11px] text-[#6E503F] font-sans">
                           {generationState === "ANALYZING" && "Understanding application requirements..."}
                           {generationState === "GENERATING_CODE" && `Creating ${activeFileObject.name.replace("src/", "")}...`}
                           {generationState === "BUILDING" && "Putting everything together..."}
                         </p>
                       </div>
-                      <div className="w-44 h-1 bg-neutral-100 rounded-full overflow-hidden border border-neutral-200/50">
+                      <div className="w-44 h-1 bg-[#EDE3DA] rounded-full overflow-hidden border border-[#E2D4C8]">
                         <div
-                          className="h-full bg-neutral-900 rounded-full transition-all duration-300 ease-out"
+                          className="h-full bg-[#2E6BFF] rounded-full transition-all duration-300 ease-out"
                           style={{
                             width:
                               generationState === "ANALYZING"
@@ -1052,20 +1098,24 @@ export function CodeToLivePreview({
 
                 {generationState === "READY" && (
                   <>
-                    <div className="w-5 h-5 rounded-full bg-neutral-900 text-white flex items-center justify-center shadow-2xs">
+                    <div className="w-5 h-5 rounded-full bg-[#2E6BFF] text-white flex items-center justify-center shadow-2xs">
                       <Check className="w-3 h-3 stroke-[2]" />
                     </div>
                     <div className="space-y-0.5">
-                      <p className="text-[12px] font-semibold text-neutral-900 tracking-tight">Application ready</p>
-                      <p className="text-[11px] text-neutral-500 font-sans">Rendering live preview...</p>
+                      <p className="text-[12px] font-semibold text-[#2E160C] tracking-tight">Application ready</p>
+                      <p className="text-[11px] text-[#6E503F] font-sans">Rendering live preview...</p>
                     </div>
                   </>
                 )}
 
                 {(generationState === "IDLE" || generationState === "PROMPT_SUBMITTED") && (
-                  <div className="space-y-1">
-                    <p className="text-[12px] font-medium text-neutral-600">Ready to build</p>
-                    <p className="text-[11px] text-neutral-400 font-sans">Waiting for prompt submission...</p>
+                  <div className="space-y-1 text-center py-0.5">
+                    <p className="text-[12px] font-medium text-[#2E160C]">Ready to build</p>
+                    <p className="text-[11px] text-[#6E503F] font-sans">
+                      {generationState === "PROMPT_SUBMITTED"
+                        ? "Analyzing prompt requirements..."
+                        : "Waiting for prompt submission..."}
+                    </p>
                   </div>
                 )}
               </div>
@@ -1080,16 +1130,16 @@ export function CodeToLivePreview({
               className="flex-1 flex flex-col min-h-0 bg-white relative"
             >
               {appType === "bitecraft" && (
-                <div className="flex-1 flex flex-col min-h-0 bg-[#ffffff] relative">
-                  <div className="h-11 px-3 sm:px-4 border-b border-[#f0f0f0] flex items-center justify-between shrink-0 bg-white">
+                <div className="flex-1 flex flex-col min-h-0 bg-[#FAF4EF] relative">
+                  <div className="h-11 px-3 sm:px-4 border-b border-[#E2D4C8] flex items-center justify-between shrink-0 bg-[#FAF4EF]">
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-lg bg-[#171717] text-white flex items-center justify-center font-bold text-xs shadow-2xs">
+                      <div className="w-6 h-6 rounded-lg bg-[#2E160C] text-white flex items-center justify-center font-bold text-xs shadow-2xs">
                         <Flame className="w-3.5 h-3.5 text-amber-400" />
                       </div>
-                      <span className="font-bold text-xs tracking-tight text-[#171717]">BiteCraft</span>
-                      <span className="text-[#e5e5e5] font-light">/</span>
-                      <span className="text-[11px] text-[#737373] hidden sm:flex items-center gap-1 font-sans">
-                        <MapPin className="w-3 h-3 text-[#737373]" /> Bengaluru, KA
+                      <span className="font-bold text-xs tracking-tight text-[#2E160C]">BiteCraft</span>
+                      <span className="text-[#E2D4C8] font-light">/</span>
+                      <span className="text-[11px] text-[#6E503F] hidden sm:flex items-center gap-1 font-sans">
+                        <MapPin className="w-3 h-3 text-[#6E503F]" /> Bengaluru, KA
                       </span>
                     </div>
 
@@ -1099,7 +1149,7 @@ export function CodeToLivePreview({
                         recordUserInteraction();
                         setIsCartOpen(!isCartOpen);
                       }}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#171717] hover:bg-[#303030] text-white text-[11px] font-sans font-medium transition-all active:scale-[0.98] shadow-2xs cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#2E6BFF] hover:bg-[#2057DF] text-white text-[11px] font-sans font-medium transition-all active:scale-[0.98] shadow-2xs cursor-pointer"
                     >
                       <ShoppingBag className="w-3.5 h-3.5" />
                       <span>{cartItems.length} items</span>
@@ -1108,9 +1158,9 @@ export function CodeToLivePreview({
                     </button>
                   </div>
 
-                  <div className="px-3 sm:px-4 py-2 border-b border-[#f0f0f0] space-y-2 bg-white shrink-0">
-                    <div className="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-[#f5f5f5] border border-[#e5e5e5] text-xs">
-                      <Search className="w-3.5 h-3.5 text-[#a3a3a3] shrink-0" />
+                  <div className="px-3 sm:px-4 py-2 border-b border-[#E2D4C8] space-y-2 bg-[#FAF4EF] shrink-0">
+                    <div className="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-[#EDE3DA] border border-[#E2D4C8] text-xs">
+                      <Search className="w-3.5 h-3.5 text-[#9B7D6E] shrink-0" />
                       <input
                         type="text"
                         value={searchQuery}
@@ -1119,7 +1169,7 @@ export function CodeToLivePreview({
                           setSearchQuery(e.target.value);
                         }}
                         placeholder="Search burgers, pizza, biryani..."
-                        className="w-full bg-transparent text-[11px] text-[#171717] placeholder:text-[#a3a3a3] focus:outline-none"
+                        className="w-full bg-transparent text-[11px] text-[#2E160C] placeholder:text-[#9B7D6E] focus:outline-none"
                       />
                     </div>
 
@@ -1132,28 +1182,28 @@ export function CodeToLivePreview({
                             setSelectedCategory(cat);
                           }}
                           className={`px-2.5 py-0.5 rounded-full text-[11px] font-sans font-medium transition-all shrink-0 cursor-pointer ${selectedCategory === cat
-                            ? "bg-[#171717] text-white shadow-2xs"
-                            : "bg-[#f5f5f5] text-[#737373] hover:text-[#171717] hover:bg-[#e5e5e5]"
+                            ? "bg-[#2E6BFF] text-white shadow-2xs font-semibold"
+                            : "bg-[#EDE3DA] text-[#6E503F] hover:text-[#2E160C] hover:bg-[#E2D4C8]"
                             }`}
                         >
                           {cat}
                         </button>
                       ))}
-                      <span className="text-[10.5px] text-[#737373] font-sans font-normal ml-auto hidden sm:flex items-center gap-1">
+                      <span className="text-[10.5px] text-[#6E503F] font-sans font-normal ml-auto hidden sm:flex items-center gap-1">
                         Free delivery in 25m
                       </span>
                     </div>
                   </div>
 
-                  <div className="flex-1 p-3 overflow-y-auto min-h-0 space-y-2.5">
+                  <div className="flex-1 p-3 overflow-y-auto min-h-0 space-y-2.5 bg-[#F4EBE3]">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                       {filteredRestaurants.map((rest) => (
                         <div
                           key={rest.id}
-                          className="p-2 rounded-2xl border border-[#e5e5e5] bg-white shadow-[0_1px_0_rgba(255,255,255,0.9)_inset,0_1px_3px_rgba(0,0,0,0.02)] hover:border-[#d4d4d8] transition-all flex flex-col justify-between group/card"
+                          className="p-2 rounded-2xl border border-[#E2D4C8] bg-[#FAF4EF] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset,0_1px_3px_rgba(46,22,12,0.02)] hover:border-[#C4B1A0] transition-all flex flex-col justify-between group/card"
                         >
                           <div>
-                            <div className="relative h-24 sm:h-26 w-full rounded-xl overflow-hidden bg-neutral-100 mb-2">
+                            <div className="relative h-24 sm:h-26 w-full rounded-xl overflow-hidden bg-[#EDE3DA] mb-2">
                               <Image
                                 src={rest.image}
                                 alt={rest.name}
@@ -1163,23 +1213,23 @@ export function CodeToLivePreview({
                                 sizes="(max-width: 768px) 100vw, 300px"
                                 className="object-cover group-hover/card:scale-105 transition-transform duration-300"
                               />
-                              <span className="absolute top-1.5 left-1.5 px-1.5 py-0.2 rounded-md bg-white/95 text-[9px] font-sans font-semibold text-[#171717] shadow-xs">
+                              <span className="absolute top-1.5 left-1.5 px-1.5 py-0.2 rounded-md bg-[#FAF4EF]/95 text-[9px] font-sans font-semibold text-[#2E160C] shadow-xs">
                                 {rest.badge}
                               </span>
-                              <span className="absolute bottom-1.5 right-1.5 px-1.5 py-0.2 rounded-md bg-[#171717]/85 text-[9px] font-sans font-medium text-white shadow-xs flex items-center gap-0.5">
+                              <span className="absolute bottom-1.5 right-1.5 px-1.5 py-0.2 rounded-md bg-[#2E160C]/90 text-[9px] font-sans font-medium text-white shadow-xs flex items-center gap-0.5">
                                 <Clock className="w-2.5 h-2.5" /> {rest.time}
                               </span>
                             </div>
 
                             <div className="flex items-baseline justify-between gap-1">
-                              <h3 className="font-semibold text-xs text-[#171717] truncate">{rest.name}</h3>
+                              <h3 className="font-semibold text-xs text-[#2E160C] truncate">{rest.name}</h3>
                               <span className="text-[10.5px] font-medium text-[#78350f] bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200/60 font-sans shrink-0 flex items-center gap-0.5">
                                 <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-500" />
                                 <span>{rest.rating}</span>
                               </span>
                             </div>
 
-                            <p className="text-[10.5px] text-[#737373] truncate font-sans mt-0.5">
+                            <p className="text-[10.5px] text-[#6E503F] truncate font-sans mt-0.5">
                               {rest.featuredItem} • ₹{rest.price}
                             </p>
                           </div>
@@ -1188,8 +1238,8 @@ export function CodeToLivePreview({
                             type="button"
                             onClick={() => handleAddToCart(rest)}
                             className={`mt-2 w-full py-1.5 rounded-xl text-[11px] font-sans font-medium transition-all flex items-center justify-center gap-1 cursor-pointer active:scale-[0.98] ${addedNoticeId === rest.id
-                              ? "bg-[#262626] text-white shadow-xs"
-                              : "bg-[#171717] hover:bg-[#303030] text-white shadow-2xs"
+                              ? "bg-[#2E160C] text-white shadow-xs"
+                              : "bg-[#2E6BFF] hover:bg-[#2057DF] text-white shadow-2xs"
                               }`}
                           >
                             {addedNoticeId === rest.id ? (
@@ -1216,13 +1266,13 @@ export function CodeToLivePreview({
                         animate={{ x: 0, opacity: 1 }}
                         exit={{ x: "100%", opacity: 0 }}
                         transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                        className="absolute inset-y-0 right-0 w-64 bg-white border-l border-[#e5e5e5] shadow-xl p-3 flex flex-col justify-between z-20"
+                        className="absolute inset-y-0 right-0 w-64 bg-[#FAF4EF] border-l border-[#E2D4C8] shadow-xl p-3 flex flex-col justify-between z-20"
                       >
                         <div>
-                          <div className="flex items-center justify-between pb-2 border-b border-[#f0f0f0]">
+                          <div className="flex items-center justify-between pb-2 border-b border-[#E2D4C8]">
                             <div className="flex items-center gap-1.5">
-                              <ShoppingBag className="w-3.5 h-3.5 text-[#171717]" />
-                              <h4 className="font-semibold text-xs text-[#171717]">
+                              <ShoppingBag className="w-3.5 h-3.5 text-[#2E6BFF]" />
+                              <h4 className="font-semibold text-xs text-[#2E160C]">
                                 Your Basket ({cartItems.length})
                               </h4>
                             </div>
@@ -1231,7 +1281,7 @@ export function CodeToLivePreview({
                                 recordUserInteraction();
                                 setIsCartOpen(false);
                               }}
-                              className="p-1 rounded-md text-[#737373] hover:text-[#171717] hover:bg-[#f5f5f5]"
+                              className="p-1 rounded-md text-[#6E503F] hover:text-[#2E160C] hover:bg-[#EDE3DA]"
                             >
                               <X className="w-3.5 h-3.5" />
                             </button>
@@ -1241,17 +1291,17 @@ export function CodeToLivePreview({
                             {cartItems.map((item, idx) => (
                               <div
                                 key={item.id}
-                                className="flex items-center justify-between text-xs p-1.5 rounded-lg bg-[#fafafa] border border-[#f0f0f0]"
+                                className="flex items-center justify-between text-xs p-1.5 rounded-lg bg-[#FAF4EF] border border-[#E2D4C8]"
                               >
                                 <div className="truncate pr-1">
-                                  <span className="font-medium text-[#171717] block truncate text-[11px]">
+                                  <span className="font-medium text-[#2E160C] block truncate text-[11px]">
                                     {item.name}
                                   </span>
-                                  <span className="text-[10px] text-[#737373]">₹{item.price}</span>
+                                  <span className="text-[10px] text-[#6E503F]">₹{item.price}</span>
                                 </div>
                                 <button
                                   onClick={() => handleRemoveFromCart(idx)}
-                                  className="text-[10px] text-[#a3a3a3] hover:text-red-600 font-sans p-1"
+                                  className="text-[10px] text-[#9B7D6E] hover:text-red-600 font-sans p-1"
                                   title="Remove"
                                 >
                                   ×
@@ -1261,8 +1311,8 @@ export function CodeToLivePreview({
                           </div>
                         </div>
 
-                        <div className="pt-2 border-t border-[#f0f0f0] space-y-2">
-                          <div className="flex justify-between text-xs font-semibold text-[#171717]">
+                        <div className="pt-2 border-t border-[#E2D4C8] space-y-2">
+                          <div className="flex justify-between text-xs font-semibold text-[#2E160C]">
                             <span>Total</span>
                             <span>₹{cartTotal.toLocaleString("en-IN")}</span>
                           </div>
@@ -1272,7 +1322,7 @@ export function CodeToLivePreview({
                               recordUserInteraction();
                               alert(`Order confirmed for ${cartItems.length} items! Total: ₹${cartTotal.toLocaleString("en-IN")}`);
                             }}
-                            className="w-full py-2 rounded-xl bg-[#171717] hover:bg-[#303030] text-white text-xs font-medium flex items-center justify-center gap-1.5 shadow-2xs active:scale-[0.98] cursor-pointer"
+                            className="w-full py-2 rounded-xl bg-[#2E6BFF] hover:bg-[#2057DF] text-white text-xs font-medium flex items-center justify-center gap-1.5 shadow-2xs active:scale-[0.98] cursor-pointer"
                           >
                             <span>Checkout Order</span>
                             <ArrowRight className="w-3.5 h-3.5 text-white/80" />
@@ -1285,10 +1335,10 @@ export function CodeToLivePreview({
               )}
 
               {appType === "flowboard" && (
-                <div className="flex-1 flex flex-col min-h-0 bg-[#fafafa] text-[#18181b]">
-                  <div className="h-11 px-3 sm:px-4 border-b border-[#e5e5e5] bg-white flex items-center justify-between shrink-0">
+                <div className="flex-1 flex flex-col min-h-0 bg-[#F4EBE3] text-[#2E160C]">
+                  <div className="h-11 px-3 sm:px-4 border-b border-[#E2D4C8] bg-[#FAF4EF] flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-2">
-                      <div className="w-5 h-5 rounded-[6px] bg-[#18181b] border border-[#27272a] flex items-center justify-center shadow-2xs shrink-0">
+                      <div className="w-5 h-5 rounded-[6px] bg-[#2E160C] border border-[#4A3426] flex items-center justify-center shadow-2xs shrink-0">
                         <svg
                           width="12"
                           height="12"
@@ -1297,27 +1347,27 @@ export function CodeToLivePreview({
                           xmlns="http://www.w3.org/2000/svg"
                           aria-hidden="true"
                         >
-                          <rect x="2" y="3" width="3.2" height="10" rx="1.2" fill="#71717a" />
-                          <rect x="6.4" y="1.5" width="3.2" height="13" rx="1.2" fill="#d4d4d8" />
-                          <rect x="10.8" y="4.5" width="3.2" height="8.5" rx="1.2" fill="#3b82f6" />
+                          <rect x="2" y="3" width="3.2" height="10" rx="1.2" fill="#9B7D6E" />
+                          <rect x="6.4" y="1.5" width="3.2" height="13" rx="1.2" fill="#C4B1A0" />
+                          <rect x="10.8" y="4.5" width="3.2" height="8.5" rx="1.2" fill="#2E6BFF" />
                         </svg>
                       </div>
-                      <span className="font-semibold text-xs tracking-tight text-[#171717]">FlowBoard</span>
-                      <span className="text-[#d4d4d8] font-light">/</span>
-                      <span className="text-[11px] font-medium text-[#737373]">
+                      <span className="font-semibold text-xs tracking-tight text-[#2E160C]">FlowBoard</span>
+                      <span className="text-[#C4B1A0] font-light">/</span>
+                      <span className="text-[11px] font-medium text-[#6E503F]">
                         Sprint {sprintInfo.sprintNumber}
                       </span>
-                      <span className="hidden sm:inline-flex items-center text-[10.5px] text-[#71717a] font-sans font-normal ml-0.5">
-                        <span className="text-[#d4d4d8] mx-1.5 font-light">/</span>
+                      <span className="hidden sm:inline-flex items-center text-[10.5px] text-[#6E503F] font-sans font-normal ml-0.5">
+                        <span className="text-[#C4B1A0] mx-1.5 font-light">/</span>
                         <span>{sprintInfo.formattedDateRange}</span>
-                        <span className="ml-2 px-1.5 py-0.5 rounded text-[9.5px] font-medium bg-[#f4f4f5] text-[#52525b] border border-[#e4e4e7]">
+                        <span className="ml-2 px-1.5 py-0.5 rounded text-[9.5px] font-medium bg-[#EDE3DA] text-[#6E503F] border border-[#E2D4C8]">
                           {sprintInfo.status}
                         </span>
                       </span>
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <div className="flex items-center p-0.5 rounded-lg bg-[#f4f4f5] border border-[#e4e4e7] text-[10px] font-medium select-none">
+                      <div className="flex items-center p-0.5 rounded-lg bg-[#EDE3DA] border border-[#E2D4C8] text-[10px] font-medium select-none">
                         <button
                           type="button"
                           onClick={() => {
@@ -1326,8 +1376,8 @@ export function CodeToLivePreview({
                           }}
                           className={`px-2 py-0.5 rounded-md transition-all cursor-pointer ${
                             flowboardView === "board"
-                              ? "bg-white text-[#18181b] shadow-2xs font-semibold"
-                              : "text-[#71717a] hover:text-[#18181b]"
+                              ? "bg-[#FAF4EF] text-[#2E160C] shadow-2xs font-semibold"
+                              : "text-[#6E503F] hover:text-[#2E160C]"
                           }`}
                         >
                           Board
@@ -1340,8 +1390,8 @@ export function CodeToLivePreview({
                           }}
                           className={`px-2 py-0.5 rounded-md transition-all cursor-pointer ${
                             flowboardView === "list"
-                              ? "bg-white text-[#18181b] shadow-2xs font-semibold"
-                              : "text-[#71717a] hover:text-[#18181b]"
+                              ? "bg-[#FAF4EF] text-[#2E160C] shadow-2xs font-semibold"
+                              : "text-[#6E503F] hover:text-[#2E160C]"
                           }`}
                         >
                           List
@@ -1349,13 +1399,13 @@ export function CodeToLivePreview({
                       </div>
 
                       <div className="flex items-center -space-x-1.5 pl-1">
-                        <span className="w-5 h-5 rounded-full bg-[#18181b] text-white font-medium text-[8px] flex items-center justify-center ring-2 ring-white">
+                        <span className="w-5 h-5 rounded-full bg-[#2E160C] text-white font-medium text-[8px] flex items-center justify-center ring-2 ring-[#FAF4EF]">
                           AK
                         </span>
-                        <span className="w-5 h-5 rounded-full bg-[#4f46e5] text-white font-medium text-[8px] flex items-center justify-center ring-2 ring-white">
+                        <span className="w-5 h-5 rounded-full bg-[#2E6BFF] text-white font-medium text-[8px] flex items-center justify-center ring-2 ring-[#FAF4EF]">
                           SM
                         </span>
-                        <span className="w-5 h-5 rounded-full bg-[#475569] text-white font-medium text-[8px] flex items-center justify-center ring-2 ring-white">
+                        <span className="w-5 h-5 rounded-full bg-[#6E503F] text-white font-medium text-[8px] flex items-center justify-center ring-2 ring-[#FAF4EF]">
                           RV
                         </span>
                       </div>
@@ -1363,7 +1413,7 @@ export function CodeToLivePreview({
                       <button
                         type="button"
                         onClick={handleAddKanbanTask}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#171717] hover:bg-black text-white text-[11px] font-sans font-medium transition-all active:scale-[0.98] shadow-2xs cursor-pointer ml-1"
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#2E6BFF] hover:bg-[#2057DF] text-white text-[11px] font-sans font-medium transition-all active:scale-[0.98] shadow-[0_2px_8px_rgba(46,107,255,0.25)] cursor-pointer ml-1"
                       >
                         <Plus className="w-3 h-3" />
                         <span>New Task</span>
@@ -1372,14 +1422,14 @@ export function CodeToLivePreview({
                   </div>
 
                   {flowboardView === "board" ? (
-                    <div className="flex-1 p-3 overflow-x-auto overflow-y-hidden min-h-0 bg-[#fafafa]">
+                    <div className="flex-1 p-3 overflow-x-auto overflow-y-hidden min-h-0 bg-[#F4EBE3]">
                       <div className="grid grid-cols-3 gap-2.5 h-full min-w-[500px]">
-                        <div className="flex flex-col h-full bg-[#f4f4f5]/70 rounded-xl border border-[#e4e4e7] p-2 overflow-hidden">
-                          <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#e4e4e7]/70">
+                        <div className="flex flex-col h-full bg-[#EDE3DA]/80 rounded-xl border border-[#E2D4C8] p-2 overflow-hidden">
+                          <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#E2D4C8]/70">
                             <div className="flex items-center gap-1.5">
-                              <Circle className="w-3.5 h-3.5 text-[#a1a1aa] stroke-[1.5]" />
-                              <span className="text-[11.5px] font-semibold text-[#18181b] tracking-tight">To Do</span>
-                              <span className="text-[11px] font-sans font-normal text-[#a1a1aa] ml-0.5">
+                              <Circle className="w-3.5 h-3.5 text-[#9B7D6E] stroke-[1.5]" />
+                              <span className="text-[11.5px] font-semibold text-[#2E160C] tracking-tight">To Do</span>
+                              <span className="text-[11px] font-sans font-normal text-[#9B7D6E] ml-0.5">
                                 {kanbanTasks.filter((t) => t.status === "todo").length}
                               </span>
                             </div>
@@ -1387,7 +1437,7 @@ export function CodeToLivePreview({
                               type="button"
                               onClick={handleAddKanbanTask}
                               title="Add task"
-                              className="p-1 rounded text-[#a1a1aa] hover:text-[#18181b] hover:bg-white transition-colors cursor-pointer"
+                              className="p-1 rounded text-[#9B7D6E] hover:text-[#2E160C] hover:bg-[#FAF4EF] transition-colors cursor-pointer"
                             >
                               <Plus className="w-3 h-3" />
                             </button>
@@ -1400,39 +1450,39 @@ export function CodeToLivePreview({
                                 <div
                                   key={task.id}
                                   onClick={() => handleMoveKanbanTask(task.id)}
-                                  className="p-2.5 rounded-lg bg-white border border-[#e4e4e7] shadow-2xs hover:border-[#a1a1aa] hover:shadow-xs transition-all cursor-pointer group/card select-none"
+                                  className="p-2.5 rounded-lg bg-[#FAF4EF] border border-[#E2D4C8] shadow-2xs hover:border-[#C4B1A0] hover:shadow-xs transition-all cursor-pointer group/card select-none"
                                 >
                                   <div className="flex items-center justify-between gap-1 mb-1">
                                     <div className="flex items-center gap-1.5">
-                                      <span className="text-[11.5px] font-sans font-medium text-[#71717a]">
+                                      <span className="text-[11.5px] font-sans font-medium text-[#6E503F]">
                                         {task.key}
                                       </span>
-                                      <span className="text-[10px] font-sans font-medium px-1.5 py-0.5 rounded-md bg-[#f4f4f5] text-[#52525b] border border-[#e4e4e7]">
+                                      <span className="text-[10px] font-sans font-medium px-1.5 py-0.5 rounded-md bg-[#EDE3DA] text-[#6E503F] border border-[#E2D4C8]">
                                         {task.tag}
                                       </span>
                                     </div>
-                                    <span className="text-[10px] font-sans font-medium text-[#71717a] group-hover/card:text-[#18181b] opacity-0 group-hover/card:opacity-100 transition-opacity">
+                                    <span className="text-[10px] font-sans font-medium text-[#6E503F] group-hover/card:text-[#2E6BFF] opacity-0 group-hover/card:opacity-100 transition-opacity">
                                       Start →
                                     </span>
                                   </div>
-                                  <h4 className="text-[12px] font-medium text-[#18181b] leading-snug line-clamp-2 my-1.5">
+                                  <h4 className="text-[12px] font-medium text-[#2E160C] leading-snug line-clamp-2 my-1.5">
                                     {task.title}
                                   </h4>
-                                  <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-[#f4f4f5] text-[10px] font-sans text-[#71717a]">
+                                  <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-[#EDE3DA] text-[10px] font-sans text-[#6E503F]">
                                     <div className="flex items-center gap-1.5">
                                       {task.priority === "High" ? (
                                         <span className="inline-flex items-center gap-0.5 text-rose-600 font-medium">
                                           <Flame className="w-2.5 h-2.5 text-rose-500" /> High
                                         </span>
                                       ) : (
-                                        <span className="text-[#71717a] font-medium">{task.priority}</span>
+                                        <span className="text-[#6E503F] font-medium">{task.priority}</span>
                                       )}
-                                      <span className="text-[#d4d4d8]">•</span>
-                                      <span className="inline-flex items-center gap-1 text-[#71717a]">
-                                        <Calendar className="w-2.5 h-2.5 text-[#a1a1aa]" /> {task.dueDate}
+                                      <span className="text-[#C4B1A0]">•</span>
+                                      <span className="inline-flex items-center gap-1 text-[#6E503F]">
+                                        <Calendar className="w-2.5 h-2.5 text-[#9B7D6E]" /> {task.dueDate}
                                       </span>
                                     </div>
-                                    <span className="w-4.5 h-4.5 rounded-full bg-[#18181b] text-white font-medium text-[8px] flex items-center justify-center ring-1 ring-white shrink-0">
+                                    <span className="w-4.5 h-4.5 rounded-full bg-[#2E160C] text-white font-medium text-[8px] flex items-center justify-center ring-1 ring-[#FAF4EF] shrink-0">
                                       {task.assignee.initials}
                                     </span>
                                   </div>
@@ -1441,14 +1491,14 @@ export function CodeToLivePreview({
                           </div>
                         </div>
 
-                        <div className="flex flex-col h-full bg-[#f4f4f5]/70 rounded-xl border border-[#e4e4e7] p-2 overflow-hidden">
-                          <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#e4e4e7]/70">
+                        <div className="flex flex-col h-full bg-[#EDE3DA]/80 rounded-xl border border-[#E2D4C8] p-2 overflow-hidden">
+                          <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#E2D4C8]/70">
                             <div className="flex items-center gap-1.5">
                               <div className="w-3.5 h-3.5 rounded-full border border-[#d97706]/70 flex items-center justify-center shrink-0">
                                 <div className="w-1.5 h-1.5 rounded-full bg-[#d97706]" />
                               </div>
-                              <span className="text-[11.5px] font-semibold text-[#18181b] tracking-tight">In Progress</span>
-                              <span className="text-[11px] font-sans font-normal text-[#a1a1aa] ml-0.5">
+                              <span className="text-[11.5px] font-semibold text-[#2E160C] tracking-tight">In Progress</span>
+                              <span className="text-[11px] font-sans font-normal text-[#9B7D6E] ml-0.5">
                                 {kanbanTasks.filter((t) => t.status === "in_progress").length}
                               </span>
                             </div>
@@ -1456,7 +1506,7 @@ export function CodeToLivePreview({
                               type="button"
                               onClick={handleAddKanbanTask}
                               title="Add task"
-                              className="p-1 rounded text-[#a1a1aa] hover:text-[#18181b] hover:bg-white transition-colors cursor-pointer"
+                              className="p-1 rounded text-[#9B7D6E] hover:text-[#2E160C] hover:bg-[#FAF4EF] transition-colors cursor-pointer"
                             >
                               <Plus className="w-3 h-3" />
                             </button>
@@ -1469,39 +1519,39 @@ export function CodeToLivePreview({
                                 <div
                                   key={task.id}
                                   onClick={() => handleMoveKanbanTask(task.id)}
-                                  className="p-2.5 rounded-lg bg-white border border-[#e4e4e7] shadow-2xs hover:border-[#a1a1aa] hover:shadow-xs transition-all cursor-pointer group/card select-none"
+                                  className="p-2.5 rounded-lg bg-[#FAF4EF] border border-[#E2D4C8] shadow-2xs hover:border-[#C4B1A0] hover:shadow-xs transition-all cursor-pointer group/card select-none"
                                 >
                                   <div className="flex items-center justify-between gap-1 mb-1">
                                     <div className="flex items-center gap-1.5">
-                                      <span className="text-[11.5px] font-sans font-medium text-[#71717a]">
+                                      <span className="text-[11.5px] font-sans font-medium text-[#6E503F]">
                                         {task.key}
                                       </span>
-                                      <span className="text-[10px] font-sans font-medium px-1.5 py-0.5 rounded-md bg-[#f4f4f5] text-[#52525b] border border-[#e4e4e7]">
+                                      <span className="text-[10px] font-sans font-medium px-1.5 py-0.5 rounded-md bg-[#EDE3DA] text-[#6E503F] border border-[#E2D4C8]">
                                         {task.tag}
                                       </span>
                                     </div>
-                                    <span className="text-[10px] font-sans font-medium text-[#71717a] group-hover/card:text-[#18181b] opacity-0 group-hover/card:opacity-100 transition-opacity">
+                                    <span className="text-[10px] font-sans font-medium text-[#6E503F] group-hover/card:text-[#2E6BFF] opacity-0 group-hover/card:opacity-100 transition-opacity">
                                       Done →
                                     </span>
                                   </div>
-                                  <h4 className="text-[12px] font-medium text-[#18181b] leading-snug line-clamp-2 my-1.5">
+                                  <h4 className="text-[12px] font-medium text-[#2E160C] leading-snug line-clamp-2 my-1.5">
                                     {task.title}
                                   </h4>
-                                  <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-[#f4f4f5] text-[10px] font-sans text-[#71717a]">
+                                  <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-[#EDE3DA] text-[10px] font-sans text-[#6E503F]">
                                     <div className="flex items-center gap-1.5">
                                       {task.priority === "High" ? (
                                         <span className="inline-flex items-center gap-0.5 text-rose-600 font-medium">
                                           <Flame className="w-2.5 h-2.5 text-rose-500" /> High
                                         </span>
                                       ) : (
-                                        <span className="text-[#71717a] font-medium">{task.priority}</span>
+                                        <span className="text-[#6E503F] font-medium">{task.priority}</span>
                                       )}
-                                      <span className="text-[#d4d4d8]">•</span>
-                                      <span className="inline-flex items-center gap-1 text-[#71717a]">
-                                        <Calendar className="w-2.5 h-2.5 text-[#a1a1aa]" /> {task.dueDate}
+                                      <span className="text-[#C4B1A0]">•</span>
+                                      <span className="inline-flex items-center gap-1 text-[#6E503F]">
+                                        <Calendar className="w-2.5 h-2.5 text-[#9B7D6E]" /> {task.dueDate}
                                       </span>
                                     </div>
-                                    <span className="w-4.5 h-4.5 rounded-full bg-[#4f46e5] text-white font-medium text-[8px] flex items-center justify-center ring-1 ring-white shrink-0">
+                                    <span className="w-4.5 h-4.5 rounded-full bg-[#2E6BFF] text-white font-medium text-[8px] flex items-center justify-center ring-1 ring-[#FAF4EF] shrink-0">
                                       {task.assignee.initials}
                                     </span>
                                   </div>
@@ -1510,14 +1560,14 @@ export function CodeToLivePreview({
                           </div>
                         </div>
 
-                        <div className="flex flex-col h-full bg-[#f4f4f5]/70 rounded-xl border border-[#e4e4e7] p-2 overflow-hidden">
-                          <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#e4e4e7]/70">
+                        <div className="flex flex-col h-full bg-[#EDE3DA]/80 rounded-xl border border-[#E2D4C8] p-2 overflow-hidden">
+                          <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#E2D4C8]/70">
                             <div className="flex items-center gap-1.5">
-                              <div className="w-3.5 h-3.5 rounded-full bg-[#5e6ad2] text-white flex items-center justify-center shrink-0 shadow-2xs">
+                              <div className="w-3.5 h-3.5 rounded-full bg-[#2E6BFF] text-white flex items-center justify-center shrink-0 shadow-2xs">
                                 <Check className="w-2.5 h-2.5 stroke-[2.5]" />
                               </div>
-                              <span className="text-[11.5px] font-semibold text-[#18181b] tracking-tight">Completed</span>
-                              <span className="text-[11px] font-sans font-normal text-[#a1a1aa] ml-0.5">
+                              <span className="text-[11.5px] font-semibold text-[#2E160C] tracking-tight">Completed</span>
+                              <span className="text-[11px] font-sans font-normal text-[#9B7D6E] ml-0.5">
                                 {kanbanTasks.filter((t) => t.status === "done").length}
                               </span>
                             </div>
@@ -1525,7 +1575,7 @@ export function CodeToLivePreview({
                               type="button"
                               onClick={handleAddKanbanTask}
                               title="Add task"
-                              className="p-1 rounded text-[#a1a1aa] hover:text-[#18181b] hover:bg-white transition-colors cursor-pointer"
+                              className="p-1 rounded text-[#9B7D6E] hover:text-[#2E160C] hover:bg-[#FAF4EF] transition-colors cursor-pointer"
                             >
                               <Plus className="w-3 h-3" />
                             </button>
@@ -1538,32 +1588,32 @@ export function CodeToLivePreview({
                                 <div
                                   key={task.id}
                                   onClick={() => handleMoveKanbanTask(task.id)}
-                                  className="p-2.5 rounded-lg bg-white border border-[#e4e4e7] shadow-2xs hover:border-[#a1a1aa] hover:shadow-xs transition-all cursor-pointer group/card opacity-80 select-none"
+                                  className="p-2.5 rounded-lg bg-[#FAF4EF] border border-[#E2D4C8] shadow-2xs hover:border-[#C4B1A0] hover:shadow-xs transition-all cursor-pointer group/card opacity-80 select-none"
                                 >
                                   <div className="flex items-center justify-between gap-1 mb-1">
                                     <div className="flex items-center gap-1.5">
-                                      <span className="text-[11.5px] font-sans font-medium text-[#71717a]">
+                                      <span className="text-[11.5px] font-sans font-medium text-[#6E503F]">
                                         {task.key}
                                       </span>
-                                      <span className="text-[10px] font-sans font-medium px-1.5 py-0.5 rounded-md bg-[#f4f4f5] text-[#52525b] border border-[#e4e4e7]">
+                                      <span className="text-[10px] font-sans font-medium px-1.5 py-0.5 rounded-md bg-[#EDE3DA] text-[#6E503F] border border-[#E2D4C8]">
                                         {task.tag}
                                       </span>
                                     </div>
-                                    <span className="text-[10px] font-sans font-medium text-[#71717a] opacity-0 group-hover/card:opacity-100 transition-opacity">
+                                    <span className="text-[10px] font-sans font-medium text-[#6E503F] opacity-0 group-hover/card:opacity-100 transition-opacity">
                                       Reopen ↺
                                     </span>
                                   </div>
-                                  <h4 className="text-[12px] font-medium leading-snug line-through text-[#a1a1aa] line-clamp-2 my-1.5">
+                                  <h4 className="text-[12px] font-medium leading-snug line-through text-[#9B7D6E] line-clamp-2 my-1.5">
                                     {task.title}
                                   </h4>
-                                  <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-[#f4f4f5] text-[10px] font-sans text-[#71717a]">
+                                  <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-[#EDE3DA] text-[10px] font-sans text-[#6E503F]">
                                     <div className="flex items-center gap-1.5">
-                                      <div className="w-3 h-3 rounded-full bg-[#5e6ad2] text-white flex items-center justify-center shrink-0">
+                                      <div className="w-3 h-3 rounded-full bg-[#2E6BFF] text-white flex items-center justify-center shrink-0">
                                         <Check className="w-2 h-2 stroke-[2.5]" />
                                       </div>
-                                      <span className="text-[10px] text-[#71717a] font-medium">Done</span>
+                                      <span className="text-[10px] text-[#6E503F] font-medium">Done</span>
                                     </div>
-                                    <span className="w-4.5 h-4.5 rounded-full bg-[#18181b] text-white font-medium text-[8px] flex items-center justify-center ring-1 ring-white shrink-0">
+                                    <span className="w-4.5 h-4.5 rounded-full bg-[#2E160C] text-white font-medium text-[8px] flex items-center justify-center ring-1 ring-[#FAF4EF] shrink-0">
                                       {task.assignee.initials}
                                     </span>
                                   </div>
@@ -1574,13 +1624,13 @@ export function CodeToLivePreview({
                       </div>
                     </div>
                   ) : (
-                    <div className="flex-1 p-3 overflow-y-auto min-h-0 bg-[#fafafa] space-y-3 select-none">
-                      <div className="bg-white rounded-xl border border-[#e4e4e7] shadow-2xs overflow-hidden">
-                        <div className="px-3 py-2 bg-[#f4f4f5]/80 border-b border-[#e4e4e7] flex items-center justify-between">
+                    <div className="flex-1 p-3 overflow-y-auto min-h-0 bg-[#F4EBE3] space-y-3 select-none">
+                      <div className="bg-[#FAF4EF] rounded-xl border border-[#E2D4C8] shadow-2xs overflow-hidden">
+                        <div className="px-3 py-2 bg-[#EDE3DA]/80 border-b border-[#E2D4C8] flex items-center justify-between">
                           <div className="flex items-center gap-1.5">
-                            <Circle className="w-3.5 h-3.5 text-[#a1a1aa] stroke-[1.5]" />
-                            <span className="text-[11.5px] font-semibold text-[#18181b] tracking-tight">To Do</span>
-                            <span className="text-[11px] font-sans font-normal text-[#a1a1aa] ml-0.5">
+                            <Circle className="w-3.5 h-3.5 text-[#9B7D6E] stroke-[1.5]" />
+                            <span className="text-[11.5px] font-semibold text-[#2E160C] tracking-tight">To Do</span>
+                            <span className="text-[11px] font-sans font-normal text-[#9B7D6E] ml-0.5">
                               {kanbanTasks.filter((t) => t.status === "todo").length}
                             </span>
                           </div>
@@ -1588,70 +1638,70 @@ export function CodeToLivePreview({
                             type="button"
                             onClick={handleAddKanbanTask}
                             title="Add task"
-                            className="p-1 rounded text-[#a1a1aa] hover:text-[#18181b] hover:bg-white transition-colors cursor-pointer"
+                            className="p-1 rounded text-[#9B7D6E] hover:text-[#2E160C] hover:bg-[#FAF4EF] transition-colors cursor-pointer"
                           >
                             <Plus className="w-3 h-3" />
                           </button>
                         </div>
-                        <div className="divide-y divide-[#f4f4f5]">
+                        <div className="divide-y divide-[#EDE3DA]">
                           {kanbanTasks
                             .filter((t) => t.status === "todo")
                             .map((task) => (
                               <div
                                 key={task.id}
                                 onClick={() => handleMoveKanbanTask(task.id)}
-                                className="px-3 py-2.5 flex items-center justify-between gap-3 hover:bg-[#fafafa] transition-colors cursor-pointer group/row"
+                                className="px-3 py-2.5 flex items-center justify-between gap-3 hover:bg-[#F3EBE3] transition-colors cursor-pointer group/row"
                               >
                                 <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                                  <div className="w-4 h-4 rounded-full border border-[#d4d4d8] group-hover/row:border-[#18181b] flex items-center justify-center shrink-0 transition-colors">
-                                    <Circle className="w-2.5 h-2.5 text-transparent group-hover/row:text-[#a1a1aa] fill-current transition-colors" />
+                                  <div className="w-4 h-4 rounded-full border border-[#C4B1A0] group-hover/row:border-[#2E160C] flex items-center justify-center shrink-0 transition-colors">
+                                    <Circle className="w-2.5 h-2.5 text-transparent group-hover/row:text-[#9B7D6E] fill-current transition-colors" />
                                   </div>
-                                  <span className="text-[11.5px] font-sans font-medium text-[#71717a] shrink-0">
+                                  <span className="text-[11.5px] font-sans font-medium text-[#6E503F] shrink-0">
                                     {task.key}
                                   </span>
-                                  <h4 className="text-[12px] font-medium text-[#18181b] truncate">
+                                  <h4 className="text-[12px] font-medium text-[#2E160C] truncate">
                                     {task.title}
                                   </h4>
-                                  <span className="hidden sm:inline-flex text-[9.5px] font-sans font-medium px-1.5 py-0.5 rounded-md bg-[#f4f4f5] text-[#52525b] border border-[#e4e4e7] shrink-0">
+                                  <span className="hidden sm:inline-flex text-[9.5px] font-sans font-medium px-1.5 py-0.5 rounded-md bg-[#EDE3DA] text-[#6E503F] border border-[#E2D4C8] shrink-0">
                                     {task.tag}
                                   </span>
                                 </div>
-                                <div className="flex items-center gap-2.5 shrink-0 text-[10px] font-sans text-[#71717a]">
+                                <div className="flex items-center gap-2.5 shrink-0 text-[10px] font-sans text-[#6E503F]">
                                   {task.priority === "High" ? (
                                     <span className="inline-flex items-center gap-0.5 text-rose-600 font-medium">
                                       <Flame className="w-2.5 h-2.5 text-rose-500" /> High
                                     </span>
                                   ) : (
-                                    <span className="text-[#71717a] font-medium">{task.priority}</span>
+                                    <span className="text-[#6E503F] font-medium">{task.priority}</span>
                                   )}
-                                  <span className="hidden md:inline-flex items-center gap-1 text-[#71717a]">
-                                    <Calendar className="w-2.5 h-2.5 text-[#a1a1aa]" /> {task.dueDate}
+                                  <span className="hidden md:inline-flex items-center gap-1 text-[#6E503F]">
+                                    <Calendar className="w-2.5 h-2.5 text-[#9B7D6E]" /> {task.dueDate}
                                   </span>
-                                  <span className="w-4.5 h-4.5 rounded-full bg-[#18181b] text-white font-medium text-[8px] flex items-center justify-center ring-1 ring-white shrink-0">
+                                  <span className="w-4.5 h-4.5 rounded-full bg-[#2E160C] text-white font-medium text-[8px] flex items-center justify-center ring-1 ring-[#FAF4EF] shrink-0">
                                     {task.assignee.initials}
                                   </span>
-                                  <span className="text-[10px] font-medium text-[#18181b] opacity-0 group-hover/row:opacity-100 transition-opacity hidden sm:inline-block">
+                                  <span className="text-[10px] font-medium text-[#2E6BFF] opacity-0 group-hover/row:opacity-100 transition-opacity hidden sm:inline-block">
                                     Start →
                                   </span>
                                 </div>
                               </div>
                             ))}
                           {kanbanTasks.filter((t) => t.status === "todo").length === 0 && (
-                            <div className="px-3 py-3 text-center text-[11px] text-[#a1a1aa] font-sans">
+                            <div className="px-3 py-3 text-center text-[11px] text-[#9B7D6E] font-sans">
                               No tasks to do
                             </div>
                           )}
                         </div>
                       </div>
 
-                      <div className="bg-white rounded-xl border border-[#e4e4e7] shadow-2xs overflow-hidden">
-                        <div className="px-3 py-2 bg-[#f4f4f5]/80 border-b border-[#e4e4e7] flex items-center justify-between">
+                      <div className="bg-[#FAF4EF] rounded-xl border border-[#E2D4C8] shadow-2xs overflow-hidden">
+                        <div className="px-3 py-2 bg-[#EDE3DA]/80 border-b border-[#E2D4C8] flex items-center justify-between">
                           <div className="flex items-center gap-1.5">
                             <div className="w-3.5 h-3.5 rounded-full border border-[#d97706]/70 flex items-center justify-center shrink-0">
                               <div className="w-1.5 h-1.5 rounded-full bg-[#d97706]" />
                             </div>
-                            <span className="text-[11.5px] font-semibold text-[#18181b] tracking-tight">In Progress</span>
-                            <span className="text-[11px] font-sans font-normal text-[#a1a1aa] ml-0.5">
+                            <span className="text-[11.5px] font-semibold text-[#2E160C] tracking-tight">In Progress</span>
+                            <span className="text-[11px] font-sans font-normal text-[#9B7D6E] ml-0.5">
                               {kanbanTasks.filter((t) => t.status === "in_progress").length}
                             </span>
                           </div>
@@ -1659,70 +1709,70 @@ export function CodeToLivePreview({
                             type="button"
                             onClick={handleAddKanbanTask}
                             title="Add task"
-                            className="p-1 rounded text-[#a1a1aa] hover:text-[#18181b] hover:bg-white transition-colors cursor-pointer"
+                            className="p-1 rounded text-[#9B7D6E] hover:text-[#2E160C] hover:bg-[#FAF4EF] transition-colors cursor-pointer"
                           >
                             <Plus className="w-3 h-3" />
                           </button>
                         </div>
-                        <div className="divide-y divide-[#f4f4f5]">
+                        <div className="divide-y divide-[#EDE3DA]">
                           {kanbanTasks
                             .filter((t) => t.status === "in_progress")
                             .map((task) => (
                               <div
                                 key={task.id}
                                 onClick={() => handleMoveKanbanTask(task.id)}
-                                className="px-3 py-2.5 flex items-center justify-between gap-3 hover:bg-[#fafafa] transition-colors cursor-pointer group/row"
+                                className="px-3 py-2.5 flex items-center justify-between gap-3 hover:bg-[#F3EBE3] transition-colors cursor-pointer group/row"
                               >
                                 <div className="flex items-center gap-2.5 min-w-0 flex-1">
                                   <div className="w-4 h-4 rounded-full border border-[#d97706] flex items-center justify-center shrink-0">
                                     <div className="w-1.5 h-1.5 rounded-full bg-[#d97706]" />
                                   </div>
-                                  <span className="text-[11.5px] font-sans font-medium text-[#71717a] shrink-0">
+                                  <span className="text-[11.5px] font-sans font-medium text-[#6E503F] shrink-0">
                                     {task.key}
                                   </span>
-                                  <h4 className="text-[12px] font-medium text-[#18181b] truncate">
+                                  <h4 className="text-[12px] font-medium text-[#2E160C] truncate">
                                     {task.title}
                                   </h4>
-                                  <span className="hidden sm:inline-flex text-[9.5px] font-sans font-medium px-1.5 py-0.5 rounded-md bg-[#f4f4f5] text-[#52525b] border border-[#e4e4e7] shrink-0">
+                                  <span className="hidden sm:inline-flex text-[9.5px] font-sans font-medium px-1.5 py-0.5 rounded-md bg-[#EDE3DA] text-[#6E503F] border border-[#E2D4C8] shrink-0">
                                     {task.tag}
                                   </span>
                                 </div>
-                                <div className="flex items-center gap-2.5 shrink-0 text-[10px] font-sans text-[#71717a]">
+                                <div className="flex items-center gap-2.5 shrink-0 text-[10px] font-sans text-[#6E503F]">
                                   {task.priority === "High" ? (
                                     <span className="inline-flex items-center gap-0.5 text-rose-600 font-medium">
                                       <Flame className="w-2.5 h-2.5 text-rose-500" /> High
                                     </span>
                                   ) : (
-                                    <span className="text-[#71717a] font-medium">{task.priority}</span>
+                                    <span className="text-[#6E503F] font-medium">{task.priority}</span>
                                   )}
-                                  <span className="hidden md:inline-flex items-center gap-1 text-[#71717a]">
-                                    <Calendar className="w-2.5 h-2.5 text-[#a1a1aa]" /> {task.dueDate}
+                                  <span className="hidden md:inline-flex items-center gap-1 text-[#6E503F]">
+                                    <Calendar className="w-2.5 h-2.5 text-[#9B7D6E]" /> {task.dueDate}
                                   </span>
-                                  <span className="w-4.5 h-4.5 rounded-full bg-[#4f46e5] text-white font-medium text-[8px] flex items-center justify-center ring-1 ring-white shrink-0">
+                                  <span className="w-4.5 h-4.5 rounded-full bg-[#2E6BFF] text-white font-medium text-[8px] flex items-center justify-center ring-1 ring-[#FAF4EF] shrink-0">
                                     {task.assignee.initials}
                                   </span>
-                                  <span className="text-[10px] font-medium text-[#18181b] opacity-0 group-hover/row:opacity-100 transition-opacity hidden sm:inline-block">
+                                  <span className="text-[10px] font-medium text-[#2E6BFF] opacity-0 group-hover/row:opacity-100 transition-opacity hidden sm:inline-block">
                                     Done →
                                   </span>
                                 </div>
                               </div>
                             ))}
                           {kanbanTasks.filter((t) => t.status === "in_progress").length === 0 && (
-                            <div className="px-3 py-3 text-center text-[11px] text-[#a1a1aa] font-sans">
+                            <div className="px-3 py-3 text-center text-[11px] text-[#9B7D6E] font-sans">
                               No tasks in progress
                             </div>
                           )}
                         </div>
                       </div>
 
-                      <div className="bg-white rounded-xl border border-[#e4e4e7] shadow-2xs overflow-hidden opacity-90">
-                        <div className="px-3 py-2 bg-[#f4f4f5]/80 border-b border-[#e4e4e7] flex items-center justify-between">
+                      <div className="bg-[#FAF4EF] rounded-xl border border-[#E2D4C8] shadow-2xs overflow-hidden opacity-90">
+                        <div className="px-3 py-2 bg-[#EDE3DA]/80 border-b border-[#E2D4C8] flex items-center justify-between">
                           <div className="flex items-center gap-1.5">
-                            <div className="w-3.5 h-3.5 rounded-full bg-[#5e6ad2] text-white flex items-center justify-center shrink-0 shadow-2xs">
+                            <div className="w-3.5 h-3.5 rounded-full bg-[#2E6BFF] text-white flex items-center justify-center shrink-0 shadow-2xs">
                               <Check className="w-2.5 h-2.5 stroke-[2.5]" />
                             </div>
-                            <span className="text-[11.5px] font-semibold text-[#18181b] tracking-tight">Completed</span>
-                            <span className="text-[11px] font-sans font-normal text-[#a1a1aa] ml-0.5">
+                            <span className="text-[11.5px] font-semibold text-[#2E160C] tracking-tight">Completed</span>
+                            <span className="text-[11px] font-sans font-normal text-[#9B7D6E] ml-0.5">
                               {kanbanTasks.filter((t) => t.status === "done").length}
                             </span>
                           </div>
@@ -1730,47 +1780,47 @@ export function CodeToLivePreview({
                             type="button"
                             onClick={handleAddKanbanTask}
                             title="Add task"
-                            className="p-1 rounded text-[#a1a1aa] hover:text-[#18181b] hover:bg-white transition-colors cursor-pointer"
+                            className="p-1 rounded text-[#9B7D6E] hover:text-[#2E160C] hover:bg-[#FAF4EF] transition-colors cursor-pointer"
                           >
                             <Plus className="w-3 h-3" />
                           </button>
                         </div>
-                        <div className="divide-y divide-[#f4f4f5]">
+                        <div className="divide-y divide-[#EDE3DA]">
                           {kanbanTasks
                             .filter((t) => t.status === "done")
                             .map((task) => (
                               <div
                                 key={task.id}
                                 onClick={() => handleMoveKanbanTask(task.id)}
-                                className="px-3 py-2.5 flex items-center justify-between gap-3 hover:bg-[#fafafa] transition-colors cursor-pointer group/row opacity-75"
+                                className="px-3 py-2.5 flex items-center justify-between gap-3 hover:bg-[#F3EBE3] transition-colors cursor-pointer group/row opacity-75"
                               >
                                 <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                                  <div className="w-4 h-4 rounded-full bg-[#5e6ad2] text-white flex items-center justify-center shrink-0 shadow-2xs">
+                                  <div className="w-4 h-4 rounded-full bg-[#2E6BFF] text-white flex items-center justify-center shrink-0 shadow-2xs">
                                     <Check className="w-2.5 h-2.5 stroke-[2.5]" />
                                   </div>
-                                  <span className="text-[11.5px] font-sans font-medium text-[#71717a] shrink-0">
+                                  <span className="text-[11.5px] font-sans font-medium text-[#6E503F] shrink-0">
                                     {task.key}
                                   </span>
-                                  <h4 className="text-[12px] font-medium text-[#a1a1aa] line-through truncate">
+                                  <h4 className="text-[12px] font-medium text-[#9B7D6E] line-through truncate">
                                     {task.title}
                                   </h4>
-                                  <span className="hidden sm:inline-flex text-[9.5px] font-sans font-medium px-1.5 py-0.5 rounded-md bg-[#f4f4f5] text-[#52525b] border border-[#e4e4e7] shrink-0">
+                                  <span className="hidden sm:inline-flex text-[9.5px] font-sans font-medium px-1.5 py-0.5 rounded-md bg-[#EDE3DA] text-[#6E503F] border border-[#E2D4C8] shrink-0">
                                     {task.tag}
                                   </span>
                                 </div>
-                                <div className="flex items-center gap-2.5 shrink-0 text-[10px] font-sans text-[#71717a]">
-                                  <span className="text-[10px] text-[#71717a] font-medium">Done</span>
-                                  <span className="w-4.5 h-4.5 rounded-full bg-[#18181b] text-white font-medium text-[8px] flex items-center justify-center ring-1 ring-white shrink-0">
+                                <div className="flex items-center gap-2.5 shrink-0 text-[10px] font-sans text-[#6E503F]">
+                                  <span className="text-[10px] text-[#6E503F] font-medium">Done</span>
+                                  <span className="w-4.5 h-4.5 rounded-full bg-[#2E160C] text-white font-medium text-[8px] flex items-center justify-center ring-1 ring-[#FAF4EF] shrink-0">
                                     {task.assignee.initials}
                                   </span>
-                                  <span className="text-[10px] font-medium text-[#71717a] opacity-0 group-hover/row:opacity-100 transition-opacity hidden sm:inline-block">
+                                  <span className="text-[10px] font-medium text-[#2E6BFF] opacity-0 group-hover/row:opacity-100 transition-opacity hidden sm:inline-block">
                                     Reopen ↺
                                   </span>
                                 </div>
                               </div>
                             ))}
                           {kanbanTasks.filter((t) => t.status === "done").length === 0 && (
-                            <div className="px-3 py-3 text-center text-[11px] text-[#a1a1aa] font-sans">
+                            <div className="px-3 py-3 text-center text-[11px] text-[#9B7D6E] font-sans">
                               No completed tasks yet
                             </div>
                           )}
@@ -1785,41 +1835,95 @@ export function CodeToLivePreview({
         </div>
 
         <div
-          className={`${mobileTab === "code" ? "flex" : "hidden"
-            } lg:flex lg:w-[25%] flex-col bg-[#111318] text-[#e6edf3] font-mono min-h-0 relative select-text overflow-hidden`}
+          className={`${
+            mobileTab === "code" ? "flex" : "hidden"
+          } lg:flex lg:w-[25%] flex-col ${
+            ideTheme === "light"
+              ? "bg-[#FAF5F0] text-[#2E160C] border-l border-[#E2D4C8]"
+              : "bg-[#241A14] text-[#E8DED6] border-l border-[#3D2E24]"
+          } font-mono min-h-0 relative select-text overflow-hidden`}
         >
-          <div className="h-7 px-2.5 bg-[#111318] border-b border-[#22242a] flex items-center justify-between shrink-0 select-none">
-            <div className="flex items-center gap-1.5 text-xs font-medium text-[#c9d1d9] shrink-0">
-              <Code2 className="w-3.5 h-3.5 text-[#8b949e]" />
-              <span className="text-[11px] font-sans font-medium">Code</span>
+          <div
+            className={`h-7 px-2.5 ${
+              ideTheme === "light"
+                ? "bg-[#F2E8DF] border-b border-[#E2D4C8]"
+                : "bg-[#2E221A] border-b border-[#3D2E24]"
+            } flex items-center justify-between shrink-0 select-none`}
+          >
+            <div className="flex items-center gap-1.5 text-xs font-medium shrink-0">
+              <Code2 className="w-3.5 h-3.5 text-[#2E6BFF]" />
+              <span
+                className={`text-[11px] font-sans font-semibold ${
+                  ideTheme === "light" ? "text-[#2E160C]" : "text-[#E8DED6]"
+                }`}
+              >
+                Code
+              </span>
             </div>
 
-            <button
-              type="button"
-              onClick={() => {
-                recordUserInteraction();
-                setIsFilesOpen((prev) => !prev);
-              }}
-              className={`flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-sans transition-colors cursor-pointer border shrink-0 ${
-                isFilesOpen
-                  ? "bg-[#1f242c] text-[#f0f6fc] border-[#38444d]"
-                  : "bg-[#161b22] text-[#8b949e] hover:text-[#f0f6fc] hover:bg-[#1f242c] border-[#22242a]"
-              }`}
-              title="Browse all project files"
-            >
-              <Folder className="w-3 h-3 text-[#8b949e]" />
-              <span className="text-[10px]">Files</span>
-              <ChevronDown
-                className={`w-2.5 h-2.5 transition-transform duration-150 ${
-                  isFilesOpen ? "rotate-180" : ""
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => {
+                  recordUserInteraction();
+                  setIdeTheme((prev) => (prev === "light" ? "dark" : "light"));
+                }}
+                className={`p-1 rounded-md text-[10px] font-sans transition-colors cursor-pointer border shrink-0 ${
+                  ideTheme === "light"
+                    ? "bg-[#FAF4EF] hover:bg-[#EDE3DA] text-[#6E503F] hover:text-[#2E160C] border-[#E2D4C8]"
+                    : "bg-[#382B21] hover:bg-[#46362A] text-[#C7B5A8] hover:text-[#FAF4EF] border-[#4D3A2E]"
                 }`}
-              />
-            </button>
+                title={ideTheme === "light" ? "Switch to dark theme" : "Switch to light theme"}
+                aria-label={ideTheme === "light" ? "Switch to dark theme" : "Switch to light theme"}
+              >
+                {ideTheme === "light" ? (
+                  <Moon className="w-2.5 h-2.5" />
+                ) : (
+                  <Sun className="w-2.5 h-2.5" />
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  recordUserInteraction();
+                  setIsFilesOpen((prev) => !prev);
+                }}
+                className={`flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-sans transition-colors cursor-pointer border shrink-0 ${
+                  isFilesOpen
+                    ? ideTheme === "light"
+                      ? "bg-[#EDE3DA] text-[#2E160C] border-[#C4B1A0]"
+                      : "bg-[#382B21] text-[#FAF4EF] border-[#5A4537]"
+                    : ideTheme === "light"
+                    ? "bg-[#FAF4EF] text-[#6E503F] hover:text-[#2E160C] hover:bg-[#EDE3DA] border-[#E2D4C8]"
+                    : "bg-[#2E221A] text-[#A69385] hover:text-[#FAF4EF] hover:bg-[#382B21] border-[#3D2E24]"
+                }`}
+                title="Browse all project files"
+              >
+                <Folder className="w-3 h-3 text-[#2E6BFF]" />
+                <span className="text-[10px]">Files</span>
+                <ChevronDown
+                  className={`w-2.5 h-2.5 transition-transform duration-150 ${
+                    isFilesOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+            </div>
           </div>
 
-          <div className="h-7 px-1.5 bg-[#0d0f12] border-b border-[#22242a] flex items-center gap-1 overflow-x-auto scrollbar-none shrink-0 select-none">
+          <div
+            className={`h-7 px-1.5 ${
+              ideTheme === "light"
+                ? "bg-[#EDE3DA] border-b border-[#E2D4C8]"
+                : "bg-[#1E1510] border-b border-[#3D2E24]"
+            } flex items-center gap-1 overflow-x-auto scrollbar-none shrink-0 select-none`}
+          >
             {generatedFiles.length === 0 ? (
-              <div className="px-2 text-[10px] text-[#484f58] font-sans flex items-center gap-1.5">
+              <div
+                className={`px-2 text-[10px] ${
+                  ideTheme === "light" ? "text-[#9B7D6E]" : "text-[#7A6456]"
+                } font-sans flex items-center gap-1.5`}
+              >
                 <span>No files generated yet</span>
               </div>
             ) : (
@@ -1842,15 +1946,27 @@ export function CodeToLivePreview({
                     }}
                     className={`px-2 py-0.5 rounded-md text-[10px] font-mono whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
                       isActive
-                        ? "bg-[#1f242c] text-[#f0f6fc] font-medium border border-[#30363d] shadow-2xs"
-                        : "text-[#8b949e] hover:text-[#e6edf3] hover:bg-[#161b22]/70 border border-transparent"
+                        ? ideTheme === "light"
+                          ? "bg-[#FAF5F0] text-[#2E6BFF] font-semibold border border-[#E2D4C8] shadow-2xs"
+                          : "bg-[#34271E] text-[#2E6BFF] font-medium border border-[#4D3A2E] shadow-2xs"
+                        : ideTheme === "light"
+                        ? "text-[#6E503F] hover:text-[#2E160C] hover:bg-[#FAF4EF]/70 border border-transparent"
+                        : "text-[#A69385] hover:text-[#E8DED6] hover:bg-[#2C2018]/70 border border-transparent"
                     }`}
                     title={path}
                   >
                     {isGeneratingThis && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#79c0ff] animate-ping" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#2E6BFF] animate-ping" />
                     )}
-                    <span className={isActive ? "text-[#79c0ff]" : "text-[#8b949e]"}>
+                    <span
+                      className={
+                        isActive
+                          ? "text-[#2E6BFF]"
+                          : ideTheme === "light"
+                          ? "text-[#6E503F]"
+                          : "text-[#A69385]"
+                      }
+                    >
                       {fileName}
                     </span>
                   </motion.button>
@@ -1866,24 +1982,50 @@ export function CodeToLivePreview({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -4 }}
                 transition={{ duration: 0.15 }}
-                className="absolute top-[57px] inset-x-0 bottom-0 z-30 bg-[#111318]/95 backdrop-blur-md border-b border-[#22242a] flex flex-col p-2.5 select-none shadow-2xl"
+                className={`absolute top-[57px] inset-x-0 bottom-0 z-30 ${
+                  ideTheme === "light"
+                    ? "bg-[#FAF5F0]/98 border-b border-[#E2D4C8]"
+                    : "bg-[#241A14]/95 border-b border-[#3D2E24]"
+                } backdrop-blur-md flex flex-col p-2.5 select-none shadow-2xl`}
               >
-                <div className="flex items-center justify-between pb-2 mb-1.5 border-b border-[#22242a] text-[10.5px]">
-                  <span className="font-semibold text-[#c9d1d9] tracking-tight">
+                <div
+                  className={`flex items-center justify-between pb-2 mb-1.5 ${
+                    ideTheme === "light" ? "border-b border-[#E2D4C8]" : "border-b border-[#3D2E24]"
+                  } text-[10.5px]`}
+                >
+                  <span
+                    className={`font-semibold tracking-tight ${
+                      ideTheme === "light" ? "text-[#2E160C]" : "text-[#E8DED6]"
+                    }`}
+                  >
                     Project Files ({appType === "bitecraft" ? "BiteCraft" : "FlowBoard"})
                   </span>
                   <button
                     type="button"
                     onClick={() => setIsFilesOpen(false)}
-                    className="p-1 rounded text-[#8b949e] hover:text-white hover:bg-[#1f242c] transition-colors cursor-pointer"
+                    className={`p-1 rounded transition-colors cursor-pointer ${
+                      ideTheme === "light"
+                        ? "text-[#6E503F] hover:text-[#2E160C] hover:bg-[#EDE3DA]"
+                        : "text-[#A69385] hover:text-white hover:bg-[#34271E]"
+                    }`}
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto space-y-0.5 scrollbar-thin scrollbar-thumb-[#22242a]">
+                <div
+                  className={`flex-1 overflow-y-auto space-y-0.5 scrollbar-thin ${
+                    ideTheme === "light"
+                      ? "scrollbar-thumb-[#E2D4C8]"
+                      : "scrollbar-thumb-[#3D2E24]"
+                  }`}
+                >
                   {generatedFiles.length === 0 ? (
-                    <div className="p-4 text-center text-[10.5px] text-[#6e7681]">
+                    <div
+                      className={`p-4 text-center text-[10.5px] ${
+                        ideTheme === "light" ? "text-[#9B7D6E]" : "text-[#7A6456]"
+                      }`}
+                    >
                       No files created yet
                     </div>
                   ) : (
@@ -1896,17 +2038,25 @@ export function CodeToLivePreview({
 
           <div
             ref={codeEditorRef}
-            className="flex-1 p-2.5 overflow-y-auto overflow-x-auto text-[9.5px] sm:text-[10px] leading-[1.65] font-mono scrollbar-thin scrollbar-thumb-[#22242a] scrollbar-track-transparent select-text"
+            className={`flex-1 p-2.5 overflow-y-auto overflow-x-auto text-[9.5px] sm:text-[10px] leading-[1.65] font-mono scrollbar-thin ${
+              ideTheme === "light"
+                ? "bg-[#FAF5F0] scrollbar-thumb-[#E2D4C8]"
+                : "bg-[#241A14] scrollbar-thumb-[#3D2E24]"
+            } scrollbar-track-transparent select-text`}
           >
             {generationState === "IDLE" ||
             generationState === "PROMPT_SUBMITTED" ||
             generationState === "ANALYZING" ||
             generatedFiles.length === 0 ? (
               <div className="flex gap-2 items-baseline pt-0.5 select-none">
-                <span className="w-6 text-right text-[#484f58] select-none text-[8.5px] sm:text-[9px] font-mono pr-1.5 shrink-0">
+                <span
+                  className={`w-6 text-right select-none text-[8.5px] sm:text-[9px] font-mono pr-1.5 shrink-0 ${
+                    ideTheme === "light" ? "text-[#A4897B]" : "text-[#7A6456]"
+                  }`}
+                >
                   1
                 </span>
-                <span className="inline-block w-[1.5px] h-3.5 bg-neutral-300 animate-pulse align-middle" />
+                <span className="inline-block w-[1.5px] h-3.5 bg-[#2E6BFF] animate-pulse align-middle" />
               </div>
             ) : (
               <>
@@ -1920,11 +2070,17 @@ export function CodeToLivePreview({
 
                   if (isCurrentFileBeingGenerated && generatedCodeLineCount === 0) {
                     return (
-                      <div className="flex gap-2 items-baseline px-2 py-0.2 bg-[#1f242c] border-l-2 border-[#79c0ff]">
-                        <span className="w-6 text-right text-[#79c0ff] select-none text-[8.5px] sm:text-[9px] font-mono pr-1.5 shrink-0">
+                      <div
+                        className={`flex gap-2 items-baseline px-2 py-0.2 ${
+                          ideTheme === "light"
+                            ? "bg-[#EDE3DA] border-l-2 border-[#2E6BFF]"
+                            : "bg-[#34271E] border-l-2 border-[#2E6BFF]"
+                        }`}
+                      >
+                        <span className="w-6 text-right text-[#2E6BFF] select-none text-[8.5px] sm:text-[9px] font-mono pr-1.5 shrink-0">
                           1
                         </span>
-                        <span className="inline-block w-[1.5px] h-3.5 bg-[#79c0ff] animate-pulse align-middle" />
+                        <span className="inline-block w-[1.5px] h-3.5 bg-[#2E6BFF] animate-pulse align-middle" />
                       </div>
                     );
                   }
@@ -1938,23 +2094,29 @@ export function CodeToLivePreview({
                         key={idx}
                         className={`flex gap-2 items-baseline px-2 py-0.2 rounded-xs transition-colors ${
                           isCurrentTypingLine
-                            ? "bg-[#1f242c] border-l-2 border-[#79c0ff]"
-                            : "hover:bg-[#161b22]/70"
+                            ? ideTheme === "light"
+                              ? "bg-[#EDE3DA] border-l-2 border-[#2E6BFF]"
+                              : "bg-[#34271E] border-l-2 border-[#2E6BFF]"
+                            : ideTheme === "light"
+                            ? "hover:bg-[#EDE3DA]/40"
+                            : "hover:bg-[#2C2018]/70"
                         }`}
                       >
                         <span
                           className={`w-6 text-right select-none text-[8.5px] sm:text-[9px] font-mono pr-1.5 shrink-0 ${
                             isCurrentTypingLine
-                              ? "text-[#79c0ff] font-semibold"
-                              : "text-[#484f58]"
+                              ? "text-[#2E6BFF] font-semibold"
+                              : ideTheme === "light"
+                              ? "text-[#A4897B]"
+                              : "text-[#7A6456]"
                           }`}
                         >
                           {idx + 1}
                         </span>
-                        <div className="flex-1 whitespace-pre flex items-center">
-                          {renderSyntaxHighlight(line)}
+                        <div className={`flex-1 whitespace-pre flex items-center ${ideTheme === "light" ? "text-[#2E160C]" : "text-[#e8ded6]"}`}>
+                          {renderSyntaxHighlight(line, ideTheme === "light")}
                           {isCurrentTypingLine && (
-                            <span className="inline-block w-[1.5px] h-3.5 bg-[#79c0ff] animate-pulse align-middle ml-0.5" />
+                            <span className="inline-block w-[1.5px] h-3.5 bg-[#2E6BFF] animate-pulse align-middle ml-0.5" />
                           )}
                         </div>
                       </div>
